@@ -8,7 +8,7 @@ class = 'center'
 +++
 # Hi 👋
 ### Let me tell you something about me!
-I'm Spark, a senior hight school student who is learning coding with C-lang and Python. ~~Who wants to enter SYSU in the future~~
+I'm Spark, a senior hight school student who is learning coding with C-lang and Python. ~~Who want to enter SYSU in the future~~
 
 My code is pushed to :(fa-brands fa-github fa-fw):: [PILIHU2022](https://github.com/PILIHU2022) and :(fa-brands fa-gitlab fa-fw):: [PILIHU](https://github.com/PILIHU)
 

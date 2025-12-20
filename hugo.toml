@@ -80,6 +80,10 @@ name = 'About Me'
 parent = 'About'
 pageRef = "/about"
 weight = 8
+[[menus.main]]
+name = 'Saying-Collections'
+pageRef = '/saying_collections'
+weight = 4
 # [[menus.main]]
 # name = "Contact Me"
 # pageRef = "/contact"
