@@ -46,4 +46,5 @@ Email me: Spark-CN@outlook.com
 
 # About the copyright
 All of the pages are under `CC BY-NC-SA 4.0` Deed
+
 [![CC BY-NC-SA 4.0 Logo](https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-sa.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
