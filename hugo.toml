@@ -43,12 +43,25 @@ avatar = "https://s2.loli.net/2025/11/15/z452tUPHnam1bCX.jpg"
 enable = true
 copyright = true
 author = true
-since = "2025"
+since = "2022"
 license = "CC BY-NC-SA 4.0"
+[params.footer.siteTime]
+  enable = true
+  animate = true
+  pre = "Runs for"
+  value = "2022-01-01T12:00:00+08:00"
 [params.footer.powered]
   enable = true
   hugoLogo = true
   themeLogo = true
+[params.footer.order]
+  powered = 0
+  copyright = 0
+  visitor = 1
+
+[params.section]
+paginate = 20
+# dateFormat = "2026-01-01"
 
 [params.social]
 email = "Spark-CN@outlook.com"
@@ -62,6 +75,10 @@ max = 32
 peakCount = 10
 orderby = "name"
 
+# [params.archives]
+# paginate = 20
+# dateFormat = "2026-01-01"
+
 [menus]
 [[menus.main]]
 name = 'Home'
@@ -71,6 +88,10 @@ weight = 1
 name = 'Tags'
 pageRef = '/tags'
 weight = 2
+# [[menus.main]]
+# name = 'Archives'
+# pageRef = '/archives'
+# weight = 2
 [[menus.main]]
 name = "Dairy"
 pageRef = "/dairy"

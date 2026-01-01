@@ -1,7 +1,10 @@
 +++
-title = "About"
-date = "2025-12-06T17:10:20+08:00"
-weight = 10
+title = "日记/Dairy"
+[params.home]
+  [params.home.profile]
+  enable = true
+  social = true
+  title = 'Hi! This blog belongs a student from China'
 +++
 
 # 关于“日记(Dairy)”页面
