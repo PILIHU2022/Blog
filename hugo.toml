@@ -92,10 +92,10 @@ weight = 2
 # name = 'Archives'
 # pageRef = '/archives'
 # weight = 2
-[[menus.main]]
-name = "Dairy"
-pageRef = "/dairy"
-weight = 3
+# [[menus.main]]
+# name = "Dairy"
+# pageRef = "/dairy"
+# weight = 3
 [[menus.main]]
 name = 'About Me'
 parent = 'About'
