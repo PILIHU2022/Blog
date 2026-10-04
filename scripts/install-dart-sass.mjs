@@ -33,6 +33,34 @@ const INSTALL_DIR = path.resolve(
 );
 const TMP_DIR = path.join(os.tmpdir(), `dart-sass-${VERSION}-${process.pid}`);
 
+/**
+ * FixIt v1 要求的最低 Dart Sass 版本。
+ * 必须硬校验：若安装失败而静默回退到 Cloudflare 镜像自带的 1.62.1，
+ * 错误会在最后编译 SCSS 时才暴露，且信息难以定位。
+ */
+const MIN_VERSION = [1, 99, 0];
+
+/** 解析形如 "1.105.1 compiled with dart2js 3.13.5" 的版本号。 */
+function parseVersion(output) {
+  const m = output.match(/(\d+)\.(\d+)\.(\d+)/);
+  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+}
+
+function assertMinVersion(actual, output) {
+  if (!actual) {
+    throw new Error(`无法解析 Dart Sass 版本号：${JSON.stringify(output)}`);
+  }
+  for (let i = 0; i < MIN_VERSION.length; i++) {
+    if (actual[i] > MIN_VERSION[i]) return;
+    if (actual[i] < MIN_VERSION[i]) {
+      throw new Error(
+        `Dart Sass ${actual.join('.')} 低于 FixIt v1 要求的 ` +
+          `${MIN_VERSION.join('.')}，构建会失败。`,
+      );
+    }
+  }
+}
+
 /** 依据当前平台推断官方 release 的资源名。 */
 function resolveAsset() {
   const { platform, arch } = process;
@@ -95,9 +123,11 @@ async function main() {
   const bin = path.join(INSTALL_DIR, binary);
   await chmod(bin, 0o755);
 
-  // 校验可用性
+  // 校验可用性与最低版本要求
   const { stdout } = await execFileAsync(bin, ['--version']);
-  console.log(`[dart-sass] 安装完成：${stdout.trim()}`);
+  const installed = stdout.trim();
+  assertMinVersion(parseVersion(installed), installed);
+  console.log(`[dart-sass] 安装完成：${installed}`);
   console.log(`[dart-sass] HUGO_SASS_BINARY=${bin}`);
 
   await rm(TMP_DIR, { recursive: true, force: true });
