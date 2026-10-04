@@ -1,0 +1,159 @@
+# =====================================================================================
+# 站点配置 —— 本站点（用户站点）
+#
+# 说明：FixIt v1 的主题自带一份完整的默认配置（themes/FixIt/hugo.toml，2000+ 行）。
+# 本站点只保留「必要配置 + 需要覆盖的项」，其余通过下面的 `_merge = "shallow"`
+# 从主题继承，避免大量重复配置。
+#
+# 完整可配置项参见主题默认配置或官方文档：
+#   https://fixit.lruihao.cn/zh-cn/docs/getting-started/configuration/
+# =====================================================================================
+
+# -------------------------------------------------------------------------------------
+# 基础配置
+# -------------------------------------------------------------------------------------
+
+# TODO: 替换为你的站点标题
+title = "My Blog"
+
+# TODO: 替换为你的正式域名（带结尾斜杠）。
+# 部署到 Cloudflare Pages 并绑定自定义域名后，必须改这里，
+# 否则 RSS、sitemap、社交分享链接都会指向错误地址。
+# 本地预览时可用 `hugo server -b http://localhost:1313/` 临时覆盖。
+baseURL = "https://example.com/"
+
+# 使用 FixIt 主题（submodule 位于 themes/FixIt）
+theme = "FixIt"
+
+# 站点默认内容语言（i18n 文件名为 zh-CN）
+defaultContentLanguage = "zh-cn"
+locale = "zh-CN"
+label = "简体中文"
+hasCJKLanguage = true
+timeZone = "Asia/Shanghai"
+# 版权信息，仅用于 SEO schema
+copyright = ""
+
+enableRobotsTXT = true
+enableEmoji = true
+
+# 是否构建未来日期的内容。
+# 开启后可以把文章 date 设为未来时间以实现「定时发布」：
+# 提交后由 Cloudflare 定时重新构建，或在到期后重新触发部署。
+buildFuture = true
+
+# 是否使用 Git 提交记录生成 lastmod。
+# 在本地已初始化 Git 的仓库中为 true；CI 环境若无 Git 历史会自动回退到文件时间。
+enableGitInfo = true
+
+# 忽略构建时的部分提示。主题开发版会提示 v1 尚未正式发布，这里是正常现象。
+# 参考主题默认配置中列出的可用 message ID。
+ignoreLogs = ["warning-dev-version"]
+
+# -------------------------------------------------------------------------------------
+# 必要配置：让本站点继承主题自带的 markup / outputs / taxonomies
+# 不要删除，否则主题的部分功能（搜索索引、归档页、分类法）会失效。
+# -------------------------------------------------------------------------------------
+
+[markup]
+_merge = "shallow"
+
+[outputs]
+_merge = "shallow"
+
+[taxonomies]
+_merge = "shallow"
+
+# -------------------------------------------------------------------------------------
+# 导航菜单
+# -------------------------------------------------------------------------------------
+
+[[menus.main]]
+identifier = "posts"
+name = "文章"
+url = "posts/"
+weight = 1
+
+[menus.main.params]
+icon = "fa-solid fa-pencil"
+
+[[menus.main]]
+identifier = "archives"
+name = "归档"
+url = "archives/"
+weight = 2
+
+[menus.main.params]
+icon = "fa-solid fa-archive"
+
+[[menus.main]]
+identifier = "categories"
+name = "分类"
+url = "categories/"
+weight = 3
+
+[menus.main.params]
+icon = "fa-solid fa-folder-tree"
+
+[[menus.main]]
+identifier = "tags"
+name = "标签"
+url = "tags/"
+weight = 4
+
+[menus.main.params]
+icon = "fa-solid fa-tags"
+
+# -------------------------------------------------------------------------------------
+# 主题参数（params）
+# 仅列出需要覆盖/关注的项，其余继承主题默认值。
+# 注意：v1 起所有主题配置键使用 snake_case（v0.x 的 camelCase 已弃用）。
+# -------------------------------------------------------------------------------------
+
+[params]
+# 主题版本标识，用于构建时校验与提示
+version = "1.0.X"
+
+# TODO: 替换为你的站点描述与关键词（影响 SEO 与首页 meta）
+description = "一个基于 Hugo 与 FixIt 主题的个人博客"
+keywords = []
+
+# 站点默认配色："light" | "dark" | "auto"
+default_theme = "auto"
+
+# TODO: 替换为你的作者信息（用于文章页、页脚、SEO）
+[params.author]
+name = ""
+email = ""
+link = ""
+avatar = ""
+
+# 顶部标题
+[params.header.title]
+name = "My Blog"
+logo = ""
+typeit = false
+
+# 站点副标题（首页 typeit 动画）
+[params.header.subtitle]
+name = "记录与分享"
+typeit = true
+
+# 搜索：使用内置 Fuse.js 全文搜索，索引由主题自动生成
+[params.search]
+enable = true
+type = "fuse"
+
+# 页脚
+[params.footer]
+enable = true
+copyright = true
+author = true
+since = ""
+
+# TODO: 按需填写社交账号（留空即不显示）。
+# 完整可用列表见主题 hugo.toml 的 [params.social] 段。
+[params.social]
+GitHub = ""
+Email = ""
+RSS = true
