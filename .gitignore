@@ -5,6 +5,9 @@
 /public/
 /resources/_gen/
 
+# Hugo 构建锁文件
+.hugo_build.lock
+
 # Hugo Modules 缓存（使用 Hugo Modules 时生成，可重建）
 /_vendor/
 # 本地 Hugo 配置覆盖（不应提交）
