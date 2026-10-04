@@ -63,3 +63,5 @@ desktop.ini
 .dart_tool/
 /sass/
 /dart-sass/
+# scripts/install-dart-sass.mjs 的安装目标
+node_modules/.dart-sass/
