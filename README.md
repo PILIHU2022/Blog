@@ -17,49 +17,62 @@
 > 没有它构建会直接报错：`You need to install Dart Sass`。
 > Hugo 内嵌的 libsass 已弃用、编不了 FixIt v1 的语法，所以**无法绕过**。
 
+**推荐：把 Dart Sass 装在系统路径**（Arch Linux）：
+
+```bash
+sudo pacman -S dart-sass
+sass --version        # 应 >= 1.99.0
+```
+
+装到 `/usr/bin/sass` 后，**所有用户都可用，裸跑 `hugo` 就能构建**，
+不需要任何环境变量——这是最省心的方式。
+
 ## 首次配置（每个协作者只需一次）
 
 本仓库由两个系统用户共同维护（`Spark` 与 `dsh`），各自的家目录都是 `700`，
-**互相读不到对方装在 `$HOME` 里的工具**。因此 Dart Sass 统一装在**仓库内**的
-`.sass/`，两个用户和 CI 都从同一处读取：
+**互相读不到对方装在 `$HOME` 里的工具**。
+
+**首选做法**：用包管理器把 Dart Sass 装到系统路径（见上），两个用户都能用，
+之后所有命令就是普通 `hugo` 命令，无需任何包装。
+
+**备选做法**（无 root 权限、或系统包太旧时）：让脚本把 Dart Sass 装到仓库内的
+`.sass/`，两个用户与 CI 共用同一份：
 
 ```bash
 git clone --recurse-submodules <仓库地址> blog && cd blog
+hugo server -D --disableFastRender      # 已装系统 sass 时，这样即可
+```
+
+若系统里没有 Dart Sass，用包装脚本代替（会自动装到仓库内 `.sass/`）：
+
+```bash
 bash scripts/hugo.sh server -D --disableFastRender
 ```
 
-**不需要手动安装 Dart Sass**：`scripts/hugo.sh` 会在首次运行时自动把它装到
-`.sass/`，然后带上正确的环境变量调用 `hugo`。直接裸跑 `hugo` 才会报
-`You need to install Dart Sass`。
-
-> 需要提前单独安装也可以：`bash scripts/setup-dart-sass.sh`
-> （或 `node scripts/install-dart-sass.mjs`），两者都装到 `.sass/`。
-> 安装脚本会硬校验版本不低于 1.99.0，避免静默回退到旧版本、
-> 等到编译 SCSS 时才出一个难懂的错。
+也可以只安装、不包装：`bash scripts/setup-dart-sass.sh`
+（或 `node scripts/install-dart-sass.mjs`），两者都装到 `.sass/`。
+安装脚本会硬校验版本不低于 1.99.0，避免静默回退到旧版本、
+等到编译 SCSS 时才出一个难懂的错。
 
 ## 本地开发
 
 ```bash
 # 启动预览（FixIt 依赖 .Store，加 --disableFastRender 预览更准）
-bash scripts/hugo.sh server -D --disableFastRender
+hugo server -D --disableFastRender
 # 打开 http://localhost:1313/
 ```
 
 常用命令：
 
 ```bash
-bash scripts/hugo.sh server -D --disableFastRender   # 本地预览（含草稿）
-bash scripts/hugo.sh --gc --minify                   # 生产构建
-hugo new content posts/文章名.md                      # 新建文章（不需要 sass）
+hugo server -D --disableFastRender   # 本地预览（含草稿）
+hugo --gc --minify                   # 生产构建
+hugo new content posts/文章名.md      # 新建文章（不需要 sass）
 ```
 
-`scripts/hugo.sh` 只是给 `hugo` 补上 `HUGO_SASS_BINARY`（并确保 `.sass/` 已安装），
-其余参数原样透传。想少敲几个字，可把它放进自己的 PATH：
-
-```bash
-export PATH="$PWD/scripts:$PATH"
-hugo.sh server -D
-```
+> 如果环境里没有可用的系统 Dart Sass，把上面的 `hugo` 换成
+> `bash scripts/hugo.sh` 即可，其余参数相同。包装脚本只做一件事：
+> 准备好 sass 并把 `HUGO_SASS_BINARY` 指过去。
 
 ## 目录结构
 
@@ -226,18 +239,17 @@ git config --global --add safe.directory "$(pwd)/themes/FixIt"
 
 **`You need to install Dart Sass`**
 说明 Hugo 在 `PATH` 里找不到 sass，且没有设置 `HUGO_SASS_BINARY`。
-**直接裸跑 `hugo` 就会这样**，请改用包装脚本：
+
+先确认系统 sass 是否可用：
 
 ```bash
-bash scripts/hugo.sh server -D --disableFastRender
+command -v sass && sass --version      # 期望 /usr/bin/sass 且 >= 1.99.0
 ```
 
-若仍报错，确认 `.sass/` 是否装好：
-
-```bash
-ls -l .sass/sass .sass/src/dart     # 两个文件都应在，且为 755
-bash scripts/setup-dart-sass.sh     # 缺失或版本过低时重装
-```
+- 若找不到：`sudo pacman -S dart-sass`（Arch），或改用包装脚本
+  `bash scripts/hugo.sh server -D --disableFastRender`
+- 若找到但版本过低：用包装脚本走仓库内的 `.sass/`，安装脚本会硬校验版本
+- 注意 `~/.local/bin/sass` 之类会遮蔽系统版本，`command -v sass` 显示的实际路径才算数
 
 **`.sass/sass: Permission denied`**
 安装产物丢了可执行位（共享目录的默认 ACL 可能把权限压成 `660`）。
