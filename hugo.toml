@@ -124,8 +124,8 @@ default_theme = "auto"
 name = "Spark"
 email = "Spark-CN@outlook.com"
 link = "https://blog.sparkzh.top/"
-# 头像文件实际位于 static/images/avatar.png，对外路径为 /images/avatar.png
-avatar = "/images/avatar.png"
+# 头像文件实际位于 static/images/avatar.webp，对外路径为 /images/avatar.webp
+avatar = "/images/avatar.webp"
 
 # 顶部标题
 [params.header.title]
@@ -147,7 +147,7 @@ type = "fuse"
 # 主题默认 enable = false，不开启则头像与邮箱不会出现在首页。
 [params.home.profile]
 enable = true
-# 头像取 [params.author].avatar，即 /images/avatar.png
+# 头像取 [params.author].avatar，即 /images/avatar.webp
 avatar_url = ""
 # 显示在头像下方的名字
 title = "Spark"
