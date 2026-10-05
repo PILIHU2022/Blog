@@ -212,7 +212,21 @@ git config --global --add safe.directory "$(pwd)/themes/FixIt"
 
 **`You need to install Dart Sass`**
 说明 Hugo 的 `PATH` 里找不到 sass，且未设置 `HUGO_SASS_BINARY`。
-先执行 `bash scripts/setup-dart-sass.sh`，再带上环境变量构建。
+先执行 `bash scripts/setup-dart-sass.sh`，再带上环境变量构建：
+
+```bash
+bash scripts/setup-dart-sass.sh
+HUGO_SASS_BINARY=.sass/sass hugo server -D --disableFastRender
+```
+
+**`.sass/sass: Permission denied`**
+安装产物丢了可执行位（共享目录的默认 ACL 可能把权限压成 `660`）。
+确认后补上即可：
+
+```bash
+ls -l .sass/sass .sass/src/dart        # 应为 755
+chmod 755 .sass/sass .sass/src/dart    # 若不足则补
+```
 
 **内容日期在未来导致页面不生成**
 本项目已开启 `buildFuture = true`，可以按日期做定时发布。
