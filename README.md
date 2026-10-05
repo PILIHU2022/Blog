@@ -1,71 +1,92 @@
-# Blog
+# Spark's Blog
 
 基于 **Hugo** + **FixIt 主题（main 分支 / v1）** 的个人博客。
+线上地址：<https://blog.sparkzh.top/>
 
 ## 环境要求
 
-| 依赖 | 版本要求 | 本机当前版本 |
+| 依赖 | 版本要求 | 当前版本 |
 | --- | --- | --- |
 | Hugo | `>= 0.166.0` **extended** | 0.167.0 extended |
 | Dart Sass | `>= 1.99.0` | 1.105.1 |
 | Git | 任意较新版本 | 2.56.0 |
-| Node.js | `>= 22`（仅部署到 Cloudflare 时需要） | 22.23.3 |
+| Node.js | `>= 22`（仅 CI 需要） | 22.23.3 |
 
-> **为什么需要 Dart Sass？**
-> FixIt v1 的样式用现代 SCSS 编写，由 Hugo Pipes 调用外部 Dart Sass 编译。
-> 未安装时构建会直接报错。本机安装方式（Arch Linux）：
-> ```bash
-> # 方式一：pacman
-> sudo pacman -S dart-sass
-> # 方式二：官方 standalone 二进制
-> curl -sSL -o /tmp/sass.tgz https://github.com/sass/dart-sass/releases/download/1.105.1/dart-sass-1.105.1-linux-x64.tar.gz
-> mkdir -p ~/.local/lib && tar -xzf /tmp/sass.tgz -C ~/.local/lib
-> ln -sfn ~/.local/lib/dart-sass/sass ~/.local/bin/sass
-> ```
-> 或者直接运行 `npm install`（见下文「部署」一节），脚本会自动下载。
+> **为什么必须要 Dart Sass？**
+> FixIt 的样式（`assets/scss/`）用现代 SCSS 编写，必须由 Dart Sass 编译成 CSS。
+> 没有它构建会直接报错：`You need to install Dart Sass`。
+> Hugo 内嵌的 libsass 已弃用、编不了 FixIt v1 的语法，所以**无法绕过**。
+
+## 首次配置（每个协作者只需一次）
+
+本仓库由两个系统用户共同维护（`Spark` 与 `dsh`），各自的家目录都是 `700`，
+**互相读不到对方装在 `$HOME` 里的工具**。因此 Dart Sass 统一装在**仓库内**的
+`.sass/`，两个用户和 CI 都从同一处读取：
+
+```bash
+git clone --recurse-submodules <仓库地址> blog && cd blog
+bash scripts/setup-dart-sass.sh        # 下载 Dart Sass 到 .sass/
+```
+
+该脚本会校验版本不低于 1.99.0，版本不足立即报错（避免静默回退到旧版本、
+等到编译 SCSS 时才出一个难懂的错）。
 
 ## 本地开发
 
 ```bash
-# 首次克隆：务必带 --recurse-submodules 拉取主题
-git clone --recurse-submodules <仓库地址> blog && cd blog
-
-# 启动本地预览（推荐加 --disableFastRender，FixIt 依赖 .Store，实时预览更准）
-hugo server -D --disableFastRender
+# 启动预览（指定仓库内的 sass；FixIt 依赖 .Store，加 --disableFastRender 更准）
+HUGO_SASS_BINARY=.sass/sass hugo server -D --disableFastRender
 # 打开 http://localhost:1313/
 ```
 
 常用命令：
 
 ```bash
-hugo                          # 构建到 public/
-hugo server -D                # 本地预览，含草稿
-hugo --gc --minify            # 生产构建（压缩 + 清理缓存）
-hugo new content posts/文章名.md   # 新建文章（用 archetypes/posts.md 模板）
+hugo new content posts/文章名.md                      # 新建文章
+HUGO_SASS_BINARY=.sass/sass hugo --gc --minify        # 生产构建
+HUGO_SASS_BINARY=.sass/sass hugo server -D            # 本地预览（含草稿）
 ```
+
+> 若嫌每次带环境变量麻烦，可写进自己 shell 的 rc 文件：
+> `export HUGO_SASS_BINARY="$PWD/.sass/sass"`（注意用绝对路径）。
 
 ## 目录结构
 
 ```
 .
-├── hugo.toml               # 站点配置（精简版，其余继承主题默认值）
-├── archetypes/             # 新建内容的模板
+├── hugo.toml                    # 站点配置（精简版，其余继承主题默认值）
+├── archetypes/                  # 新建内容的模板
 │   ├── default.md
 │   └── posts.md
 ├── content/
-│   └── posts/              # 文章目录
+│   └── posts/                   # 文章目录
+├── static/
+│   └── images/avatar.png        # 头像（对外路径 /images/avatar.png）
 ├── scripts/
-│   └── install-dart-sass.mjs   # 为 CI 自动安装 Dart Sass
-├── package.json            # 仅用于 CI 安装 Dart Sass
+│   ├── setup-dart-sass.sh       # 本地/共享：安装 Dart Sass 到 .sass/
+│   └── install-dart-sass.mjs    # CI：npm postinstall 自动调用
+├── package.json                 # CI 安装 Dart Sass
 └── themes/
-    └── FixIt/              # 主题（git submodule，跟踪 main 分支）
+    └── FixIt/                   # 主题（git submodule，跟踪 main 分支）
 ```
 
-`public/`、`resources/`、`node_modules/`、`.hugo_build.lock` 均已忽略，不进入版本库。
+以下均已忽略，不进入版本库：
+`public/`、`resources/`、`node_modules/`、`.sass/`、`.hugo_build.lock`。
 
-## 配置说明
+## 当前站点配置
 
-**本站点没有复制主题那份 2000+ 行的默认配置。** `hugo.toml` 只写必要项，其余通过下面三行从主题继承：
+| 配置项 | 值 |
+| --- | --- |
+| `title` | `Spark's Blog` |
+| `baseURL` | `https://blog.sparkzh.top/` |
+| 作者 | Spark |
+| 邮箱 | Spark-CN@outlook.com |
+| 头像 | `/images/avatar.png` |
+| 首页 profile | 已启用（头像、名字、社交链接） |
+| 搜索 | 内置 Fuse.js |
+| 页脚起始年份 | 2026 |
+
+站点配置刻意**没有复制**主题那份 2000+ 行的默认配置，只写必要项，其余通过这三行继承：
 
 ```toml
 [markup]
@@ -78,24 +99,13 @@ _merge = "shallow"
 _merge = "shallow"
 ```
 
-> ⚠️ **v0.x 与 v1 配置不通用。** FixIt v1 把所有主题配置键从 camelCase 改成了
+> ⚠️ **v0.x 与 v1 配置不通用。** FixIt v1 把所有主题配置键从 camelCase 改成
 > snake_case，并移除了 `[params.page]`（已扁平化到 `[params]`）。
 > 官网文档中仍有大量 v0.4.x 的旧写法，照抄会触发弃用警告或配置失效。
 > 请以主题自带的 `themes/FixIt/hugo.toml` 和
 > [v1 升级指南](https://fixit.lruihao.cn/zh-cn/guides/upgrade-to-v1/) 为准。
 
-### 上线前必须替换的占位符
-
-`hugo.toml` 中搜索 `TODO`：
-
-- `title` —— 站点标题
-- `baseURL` —— 正式域名（**带结尾斜杠**）。不改的话 RSS、sitemap、分享链接全错
-- `[params].description` / `keywords`
-- `[params.author]` 下的姓名、邮箱、主页、头像
-- `[params.header.title].name`、`[params.header.subtitle].name`
-- `[params.social]` 下按需填写社交账号
-
-另外建议把站点图标放到 `static/`：`favicon.ico`、`favicon-16x16.png`、
+站点图标建议放到 `static/`：`favicon.ico`、`favicon-16x16.png`、
 `favicon-32x32.png`、`apple-touch-icon.png`、`android-chrome-192x192.png`、
 `android-chrome-512x512.png`。可用 <https://realfavicongenerator.net/> 生成。
 
@@ -144,7 +154,7 @@ Hugo 把它当可执行文件调用时会报：
 TOCSS-DART: failed to transform "/scss/main.scss": got unexpected EOF when executing "sass".
 ```
 
-因此本项目的做法是：
+因此 CI 的做法是：
 
 1. `package.json` 声明了 `postinstall` 脚本，Cloudflare 在构建前会自动执行 `npm install`；
 2. `scripts/install-dart-sass.mjs` 下载官方 **standalone 二进制** 到
@@ -155,10 +165,9 @@ TOCSS-DART: failed to transform "/scss/main.scss": got unexpected EOF when execu
 > 目录都能用。若首次构建报找不到 sass，可在构建日志中确认
 > `[dart-sass] HUGO_SASS_BINARY=...` 一行，并检查环境变量是否已保存。
 
-### 自定义域名
-
-绑定域名后，**务必把 `hugo.toml` 里的 `baseURL` 改成该域名**（带结尾斜杠），
-否则生成的绝对链接仍指向占位符域名。改完提交即可触发重新部署。
+> 本地的 `scripts/setup-dart-sass.sh` 与 CI 的 `.mjs` 装的是同一个版本，
+> 只是目标目录不同（`.sass/` 供人用，`node_modules/.dart-sass/` 供 CI 用），
+> 两者互不影响。
 
 ### 部署相关的免费额度（Free 计划）
 
@@ -166,25 +175,45 @@ TOCSS-DART: failed to transform "/scss/main.scss": got unexpected EOF when execu
 - 站点最多 20,000 个文件，单文件最大 25 MiB
 - 参考：[Pages Limits](https://developers.cloudflare.com/pages/platform/limits/)
 
-当前站点产物约 2.5 MB / 127 个文件，余量充足。
+当前站点产物约 2.5 MB，余量充足。
 
 ### 回滚
 
 Cloudflare Pages 每次部署都是一个不可变版本，控制台可一键回滚到任意历史部署。
 配合 Git 历史，形成双重回退保障。
 
+## 共享仓库的权限注意事项
+
+`/home/Projects` 是 `Spark` 与 `dsh` 两个用户共享的目录，权限模型是
+`setgid` + 属组 `agent` + 默认 ACL。因此：
+
+- **新建文件请用 shell（如 `tee`/`printf`）或编辑器直接写**，
+  不要用会「临时文件 + rename + chmod 0600」的写入方式，否则属组会退回私有组，
+  另一个用户就读不到了。
+- **不要用 `nobody`/`agent` 之外的属主创建 `public/`**。
+  实测中 `public/` 被一个用户构建后，另一个用户可能**无法写入或删除**，
+  导致构建失败（`permission denied`）。
+  遇到这种情况直接让**当前拥有该目录的用户**执行构建，
+  或先用 `rm -rf public` 由同一用户清理。
+- 本机预览可以用 `hugo --destination <自己的临时目录>` 绕开 `public/` 的归属问题。
+
 ## 常用排错
 
-**`enableGitInfo` 与 Git 仓库所有权**
-`hugo.toml` 开启了 `enableGitInfo = true`，用于生成 `lastmod`。
-如果 Git 报 `detected dubious ownership`，执行：
+**`detected dubious ownership`**
+`hugo.toml` 开启了 `enableGitInfo = true`。若报此错，执行：
 
 ```bash
 git config --global --add safe.directory "$(pwd)"
+# submodule 也要单独放行
+git config --global --add safe.directory "$(pwd)/themes/FixIt"
 ```
 
 若 CI 环境的 Git 历史不完整，Hugo 会回退到 `:fileModTime`，不影响构建。
 
+**`You need to install Dart Sass`**
+说明 Hugo 的 `PATH` 里找不到 sass，且未设置 `HUGO_SASS_BINARY`。
+先执行 `bash scripts/setup-dart-sass.sh`，再带上环境变量构建。
+
 **内容日期在未来导致页面不生成**
 本项目已开启 `buildFuture = true`，可以按日期做定时发布。
-若你把它关掉，注意 `date` 晚于当前时间的文章不会出现在 `public/` 中。
+若关掉它，注意 `date` 晚于当前时间的文章不会出现在 `public/` 中。

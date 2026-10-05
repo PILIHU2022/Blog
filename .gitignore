@@ -63,5 +63,6 @@ desktop.ini
 .dart_tool/
 /sass/
 /dart-sass/
-# scripts/install-dart-sass.mjs 的安装目标
+# Dart Sass 安装目标（仓库内共享，两个协作者与 CI 都会用到）
 node_modules/.dart-sass/
+/.sass/
