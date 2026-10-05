@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 下载并安装 Dart Sass 的 standalone 二进制到 node_modules/.dart-sass/
+ * 下载并安装 Dart Sass 的 standalone 二进制到 .sass/
  *
  * 为什么需要这个脚本：
  *   FixIt v1 要求 Dart Sass >= 1.99.0，但 Cloudflare Pages 构建镜像自带的
@@ -11,7 +11,7 @@
  *   HUGO_SASS_BINARY 使用。
  *
  * 用法：
- *   node scripts/install-dart-sass.mjs            # 安装到 node_modules/.dart-sass
+ *   node scripts/install-dart-sass.mjs            # 安装到 .sass/
  *   DART_SASS_VERSION=1.105.1 node ...            # 指定版本
  *   DART_SASS_DIR=/some/path node ...             # 指定安装目录
  *
@@ -28,9 +28,7 @@ import os from 'node:os';
 const execFileAsync = promisify(execFile);
 
 const VERSION = process.env.DART_SASS_VERSION || '1.105.1';
-const INSTALL_DIR = path.resolve(
-  process.env.DART_SASS_DIR || path.join('node_modules', '.dart-sass'),
-);
+const INSTALL_DIR = path.resolve(process.env.DART_SASS_DIR || '.sass');
 const TMP_DIR = path.join(os.tmpdir(), `dart-sass-${VERSION}-${process.pid}`);
 
 /**
