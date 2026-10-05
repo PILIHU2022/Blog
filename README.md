@@ -87,6 +87,7 @@ hugo new content posts/文章名.md      # 新建文章（不需要 sass）
 ├── static/
 │   └── images/avatar.webp       # 头像（对外路径 /images/avatar.webp）
 ├── scripts/
+│   ├── build.sh                 # CI 构建入口：固定 Hugo 版本后调用 hugo
 │   └── install-dart-sass.mjs    # 无系统 Dart Sass 时安装它（本地与 CI 通用）
 ├── package.json                 # postinstall 调用上面的安装器（带 --check）
 └── themes/
@@ -157,10 +158,30 @@ git add themes/FixIt && git commit -m "chore(theme): bump FixIt to latest main"
 | 配置项 | 值 |
 | --- | --- |
 | Production branch | `main` |
-| Build command | `hugo --gc --minify` |
+| Build command | `bash scripts/build.sh --gc --minify` |
 | Build output directory | `public` |
-| 环境变量 `HUGO_VERSION` | `0.167.0` |
-| 环境变量 `DART_SASS_BINARY` | **不需要**（见下节，用 PATH 垫片解决） |
+| 环境变量 | **不需要任何环境变量** |
+
+### 关于 Hugo 版本：为什么用 `scripts/build.sh`
+
+Cloudflare 构建镜像的 Hugo 默认版本偏旧（实测遇到 **0.147.7**），而 FixIt v1
+要求 **>= 0.166.0**，并且主题用到 `hugo.Data`（该函数 **v0.156.0** 才引入）。
+版本不足时会在处理 `themes/FixIt/content/_authors/_content.gotmpl` 时报：
+
+```
+can't evaluate field Data in type interface {}
+```
+
+这个错误完全看不出版本问题，很容易误判成主题或配置错误。
+
+因此构建命令改为 `bash scripts/build.sh`，它会：
+
+1. 检测镜像里已有的 hugo，版本满足要求就直接用（不会重复下载）；
+2. 版本不足时下载官方 **extended** 二进制到 `.hugo-bin/` 并使用；
+3. 把参数原样透传给 hugo。
+
+> 面板上的 `HUGO_VERSION` 环境变量当然也可以用，但本仓库不依赖它——
+> 构建脚本自带版本兜底，避免"变量没设上/设错作用域"导致部署失败。
 
 ### ⚠️ Dart Sass：为什么不需要环境变量
 
