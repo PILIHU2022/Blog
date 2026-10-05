@@ -1,5 +1,5 @@
 # =====================================================================================
-# 站点配置 —— 本站点（用户站点）
+# 站点配置 —— Spark's Blog
 #
 # 说明：FixIt v1 的主题自带一份完整的默认配置（themes/FixIt/hugo.toml，2000+ 行）。
 # 本站点只保留「必要配置 + 需要覆盖的项」，其余通过下面的 `_merge = "shallow"`
@@ -13,14 +13,12 @@
 # 基础配置
 # -------------------------------------------------------------------------------------
 
-# TODO: 替换为你的站点标题
-title = "My Blog"
+title = "Spark's Blog"
 
-# TODO: 替换为你的正式域名（带结尾斜杠）。
-# 部署到 Cloudflare Pages 并绑定自定义域名后，必须改这里，
-# 否则 RSS、sitemap、社交分享链接都会指向错误地址。
+# 站点正式域名，必须以 / 结尾。
+# 改这里会影响 RSS、sitemap 与社交分享的绝对链接。
 # 本地预览时可用 `hugo server -b http://localhost:1313/` 临时覆盖。
-baseURL = "https://example.com/"
+baseURL = "https://blog.sparkzh.top/"
 
 # 使用 FixIt 主题（submodule 位于 themes/FixIt）
 theme = "FixIt"
@@ -114,23 +112,24 @@ icon = "fa-solid fa-tags"
 # 主题版本标识，用于构建时校验与提示
 version = "1.0.X"
 
-# TODO: 替换为你的站点描述与关键词（影响 SEO 与首页 meta）
-description = "一个基于 Hugo 与 FixIt 主题的个人博客"
+# 站点描述与关键词（影响 SEO 与首页 meta）
+description = "Spark 的个人博客 —— 记录技术、折腾与思考"
 keywords = []
 
 # 站点默认配色："light" | "dark" | "auto"
 default_theme = "auto"
 
-# TODO: 替换为你的作者信息（用于文章页、页脚、SEO）
+# 作者信息：用于文章页、页脚与 SEO
 [params.author]
-name = ""
-email = ""
-link = ""
-avatar = ""
+name = "Spark"
+email = "Spark-CN@outlook.com"
+link = "https://blog.sparkzh.top/"
+# 头像文件实际位于 static/images/avatar.png，对外路径为 /images/avatar.png
+avatar = "/images/avatar.png"
 
 # 顶部标题
 [params.header.title]
-name = "My Blog"
+name = "Spark's Blog"
 logo = ""
 typeit = false
 
@@ -144,16 +143,30 @@ typeit = true
 enable = true
 type = "fuse"
 
+# 首页个人资料区块（头像、标题、副标题与社交链接都在这里）。
+# 主题默认 enable = false，不开启则头像与邮箱不会出现在首页。
+[params.home.profile]
+enable = true
+# 头像取 [params.author].avatar，即 /images/avatar.png
+avatar_url = ""
+# 显示在头像下方的名字
+title = "Spark"
+subtitle = "记录与分享"
+typeit = false
+# 是否显示社交链接（Email 等）
+social = true
+
 # 页脚
 [params.footer]
 enable = true
 copyright = true
 author = true
-since = ""
+# 站点创建年份，用于页脚版权区间，例如显示 2026 - 2027
+since = "2026"
 
-# TODO: 按需填写社交账号（留空即不显示）。
+# 社交账号（留空即不显示）。Email 的 mailto: 前缀由主题内置映射处理。
 # 完整可用列表见主题 hugo.toml 的 [params.social] 段。
 [params.social]
 GitHub = ""
-Email = ""
+Email = "Spark-CN@outlook.com"
 RSS = true
