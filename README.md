@@ -35,24 +35,24 @@ sass --version        # 应 >= 1.99.0
 **首选做法**：用包管理器把 Dart Sass 装到系统路径（见上），两个用户都能用，
 之后所有命令就是普通 `hugo` 命令，无需任何包装。
 
-**备选做法**（无 root 权限、或系统包太旧时）：让脚本把 Dart Sass 装到仓库内的
-`.sass/`，两个用户与 CI 共用同一份：
+**备选做法**（无 root 权限、或系统包太旧时）：把 Dart Sass 装到仓库内的
+`.sass/`（该目录已在 .gitignore 中）：
 
 ```bash
 git clone --recurse-submodules <仓库地址> blog && cd blog
 hugo server -D --disableFastRender      # 已装系统 sass 时，这样即可
 ```
 
-若系统里没有 Dart Sass，用包装脚本代替（会自动装到仓库内 `.sass/`）：
-
 ```bash
-bash scripts/hugo.sh server -D --disableFastRender
+node scripts/install-dart-sass.mjs        # 下载到 .sass/，并垫片到 node_modules/.bin
 ```
 
-也可以只安装、不包装：`bash scripts/setup-dart-sass.sh`
-（或 `node scripts/install-dart-sass.mjs`），两者都装到 `.sass/`。
-安装脚本会硬校验版本不低于 1.99.0，避免静默回退到旧版本、
-等到编译 SCSS 时才出一个难懂的错。
+安装器会硬校验版本不低于 1.99.0，避免静默回退到旧版本、等到编译 SCSS 时
+才出一个难懂的错。它同时把二进制垫片到 `node_modules/.bin/sass`，因此之后
+裸 `hugo` 也能从 `PATH` 找到它。
+
+> 本机已用系统包管理器装好 Dart Sass 时，`npm install` 会自动跳过下载
+> （`postinstall` 带 `--check`，检测到系统 sass 即直接返回）。
 
 ## 本地开发
 
@@ -70,9 +70,9 @@ hugo --gc --minify                   # 生产构建
 hugo new content posts/文章名.md      # 新建文章（不需要 sass）
 ```
 
-> 如果环境里没有可用的系统 Dart Sass，把上面的 `hugo` 换成
-> `bash scripts/hugo.sh` 即可，其余参数相同。包装脚本只做一件事：
-> 准备好 sass 并把它的目录加入 `PATH`。
+> 如果环境里没有可用的 Dart Sass，先执行一次
+> `node scripts/install-dart-sass.mjs`（或 `npm install`）把它装到 `.sass/`，
+> 之后上面的 `hugo` 命令照常可用。
 
 ## 目录结构
 
@@ -85,12 +85,10 @@ hugo new content posts/文章名.md      # 新建文章（不需要 sass）
 ├── content/
 │   └── posts/                   # 文章目录
 ├── static/
-│   └── images/avatar.png        # 头像（对外路径 /images/avatar.png）
+│   └── images/avatar.webp       # 头像（对外路径 /images/avatar.webp）
 ├── scripts/
-│   ├── hugo.sh                  # 【入口】自动准备 sass 后调用 hugo
-│   ├── setup-dart-sass.sh       # 下载 Dart Sass 到 .sass/
-│   └── install-dart-sass.mjs    # npm postinstall / 包装脚本调用
-├── package.json                 # CI 安装 Dart Sass
+│   └── install-dart-sass.mjs    # 无系统 Dart Sass 时安装它（本地与 CI 通用）
+├── package.json                 # postinstall 调用上面的安装器（带 --check）
 └── themes/
     └── FixIt/                   # 主题（git submodule，跟踪 main 分支）
 ```
@@ -197,8 +195,9 @@ TOCSS-DART: failed to transform "/scss/main.scss": got unexpected EOF when execu
 
 因此 Cloudflare 上**只需要设置 `HUGO_VERSION`**，sass 部分无需任何环境变量。
 
-> 若你的构建命令是 `bash scripts/hugo.sh`，效果相同：包装脚本会把 sass 所在目录
-> 加入 `PATH` 后再调用 hugo（同样不使用环境变量）。
+> 关键点：**sass 必须能从 `PATH` 找到**。本仓库通过 postinstall 把二进制垫片到
+> `node_modules/.bin/sass`，而 npm 会把这个目录放进子进程的 `PATH`，
+> 所以裸 `hugo` 就能用上正确的 Dart Sass。
 
 ### 部署相关的免费额度（Free 计划）
 
@@ -251,7 +250,7 @@ command -v sass && sass --version      # 期望 /usr/bin/sass 且 >= 1.99.0
 ```
 
 - 若找不到：`sudo pacman -S dart-sass`（Arch），或改用包装脚本
-  `bash scripts/hugo.sh server -D --disableFastRender`
+  `node scripts/install-dart-sass.mjs`，然后重新构建
 - 若找到但版本过低：用包装脚本走仓库内的 `.sass/`，安装脚本会硬校验版本
 - 注意 `~/.local/bin/sass` 之类会遮蔽系统版本，`command -v sass` 显示的实际路径才算数
 

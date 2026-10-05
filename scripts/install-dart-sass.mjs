@@ -12,8 +12,12 @@
  *
  * 用法：
  *   node scripts/install-dart-sass.mjs            # 安装到 .sass/
+ *   node scripts/install-dart-sass.mjs --check    # 已具备有效 sass 则直接跳过
  *   DART_SASS_VERSION=1.105.1 node ...            # 指定版本
  *   DART_SASS_DIR=/some/path node ...             # 指定安装目录
+ *
+ * postinstall 使用 --check：本地已从系统包管理器装好 Dart Sass 时不会重复下载，
+ * 而在 CI（没有系统 Dart Sass）上会正常下载并垫片到 node_modules/.bin。
  *
  * 仅使用 Node 内置模块，无第三方依赖。
  */
@@ -142,7 +146,41 @@ async function linkIntoNodeBin(bin) {
   }
 }
 
+/**
+ * 检查系统 PATH 中是否已有满足最低版本要求的 Dart Sass。
+ * 有则说明本机已用系统包管理器装好（如 pacman -S dart-sass），无需再下载。
+ */
+async function hasUsableSystemSass() {
+  for (const name of ['sass', 'dart-sass']) {
+    try {
+      const { stdout } = await execFileAsync(name, ['--version']);
+      const v = parseVersion(stdout);
+      if (v && !isBelowMin(v)) {
+        console.log(`[dart-sass] 系统 PATH 已有 Dart Sass ${v.join('.')}（${name}），跳过安装`);
+        return true;
+      }
+    } catch {
+      // 不在 PATH 或不可执行，继续尝试下一个
+    }
+  }
+  return false;
+}
+
+/** 版本是否低于最低要求。 */
+function isBelowMin(actual) {
+  for (let i = 0; i < MIN_VERSION.length; i++) {
+    if (actual[i] > MIN_VERSION[i]) return false;
+    if (actual[i] < MIN_VERSION[i]) return true;
+  }
+  return false;
+}
+
 async function main() {
+  const checkOnly = process.argv.includes('--check');
+  if (checkOnly && (await hasUsableSystemSass())) {
+    return;
+  }
+
   const { name, url, binary } = resolveAsset();
   console.log(`[dart-sass] 版本 ${VERSION} -> ${INSTALL_DIR}`);
 
