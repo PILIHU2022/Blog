@@ -72,7 +72,7 @@ hugo new content posts/文章名.md      # 新建文章（不需要 sass）
 
 > 如果环境里没有可用的系统 Dart Sass，把上面的 `hugo` 换成
 > `bash scripts/hugo.sh` 即可，其余参数相同。包装脚本只做一件事：
-> 准备好 sass 并把 `HUGO_SASS_BINARY` 指过去。
+> 准备好 sass 并把它的目录加入 `PATH`。
 
 ## 目录结构
 
@@ -159,42 +159,46 @@ git add themes/FixIt && git commit -m "chore(theme): bump FixIt to latest main"
 | 配置项 | 值 |
 | --- | --- |
 | Production branch | `main` |
-| Build command | `bash scripts/hugo.sh --gc --minify` |
+| Build command | `hugo --gc --minify` |
 | Build output directory | `public` |
 | 环境变量 `HUGO_VERSION` | `0.167.0` |
-| 环境变量 `HUGO_SASS_BINARY` | `.sass/sass`（可选，包装脚本会自动设置） |
+| 环境变量 `DART_SASS_BINARY` | **不需要**（见下节，用 PATH 垫片解决） |
 
-### ⚠️ 为什么必须设置 `HUGO_SASS_BINARY`
+### ⚠️ Dart Sass：为什么不需要环境变量
 
-这是本项目部署时**最容易踩的坑**：
+这是本项目部署时**最容易踩的坑**，而且我踩过一次错误的坑，务必按下面做。
 
-Cloudflare Pages 构建镜像自带的是 **Embedded Dart Sass，最高只有 1.62.1**
+**背景**：Cloudflare Pages 构建镜像自带的是 **Embedded Dart Sass，最高只有 1.62.1**
 （见 [Build image 文档](https://developers.cloudflare.com/pages/configuration/build-image/)），
 而 FixIt v1 要求 **≥ 1.99.0**。直接用镜像自带的版本会构建失败。
 
-同时**不能**用 npm 上的 `sass` 包来替代：那个包是 dart2js 生成的 JS 包装器，
-Hugo 把它当可执行文件调用时会报：
+同时**不能**用 npm 上的 `sass` 包：它是 dart2js 生成的 JS 包装器，Hugo 调用会报：
 
 ```
 TOCSS-DART: failed to transform "/scss/main.scss": got unexpected EOF when executing "sass".
 ```
 
-因此 CI 的做法是（与本地完全同一套）：
+**正确做法：靠 PATH 查找，不要设环境变量。**
 
-1. 构建命令用 `bash scripts/hugo.sh --gc --minify`，由包装脚本负责准备 sass；
-2. 包装脚本发现 `.sass/` 不存在时，调用 `scripts/install-dart-sass.mjs`
-   下载官方 **standalone 二进制**（真正的可执行文件，非 JS 包装器，仅用 Node 内置模块）；
-3. 包装脚本设置 `HUGO_SASS_BINARY` 后调用 hugo。
+| 方式 | 是否可用 | 说明 |
+| --- | --- | --- |
+| 把 sass 放进 `PATH` | ✅ **推荐** | Hugo 按 PATH 找 `sass`，无需任何配置 |
+| `DART_SASS_BINARY=...` | ⚠️ 需额外配置 | Hugo 确实支持这个变量，但显式指定会受 `security.exec.allow` 白名单限制，报 `not whitelisted in policy` |
+| `HUGO_SASS_BINARY=...` | ❌ **不存在** | Hugo 从未支持这个变量名，设了也没有任何效果 |
 
-> 也可以在 Cloudflare 里显式设 `HUGO_SASS_BINARY=.sass/sass` 并把构建命令写成
-> `hugo --gc --minify`：`package.json` 的 `postinstall` 会在 `npm install` 时
-> 自动把 sass 装到 `.sass/`。两条路等价，用包装脚本更省事、也更不容易配错。
+本项目的实现是一条链：
 
-> 该路径是**相对路径**，Hugo 会相对项目根目录解析，因此仓库克隆到哪个
-> 目录都能用。若首次构建报找不到 sass，可在构建日志里找
-> `[dart-sass]` 开头的行确认安装结果。
+1. `package.json` 的 `postinstall` 在 Cloudflare 的 `npm clean-install` 阶段运行；
+2. `scripts/install-dart-sass.mjs` 下载官方 **standalone 二进制** 到 `.sass/`
+   （真正的可执行文件，非 JS 包装器，仅用 Node 内置模块）；
+3. 它同时把该二进制**垫片**（符号链接）到 `node_modules/.bin/sass`；
+4. npm 会把 `node_modules/.bin` 加入子进程的 `PATH`，因此构建命令 **裸 `hugo`**
+   就能在 PATH 里找到正确的 Dart Sass。
 
-> 本地与 CI 使用同一个安装目录 `.sass/` 和同一个版本，行为一致。
+因此 Cloudflare 上**只需要设置 `HUGO_VERSION`**，sass 部分无需任何环境变量。
+
+> 若你的构建命令是 `bash scripts/hugo.sh`，效果相同：包装脚本会把 sass 所在目录
+> 加入 `PATH` 后再调用 hugo（同样不使用环境变量）。
 
 ### 部署相关的免费额度（Free 计划）
 
@@ -238,7 +242,7 @@ git config --global --add safe.directory "$(pwd)/themes/FixIt"
 若 CI 环境的 Git 历史不完整，Hugo 会回退到 `:fileModTime`，不影响构建。
 
 **`You need to install Dart Sass`**
-说明 Hugo 在 `PATH` 里找不到 sass，且没有设置 `HUGO_SASS_BINARY`。
+说明 Hugo 在 `PATH` 里找不到 `sass`。
 
 先确认系统 sass 是否可用：
 

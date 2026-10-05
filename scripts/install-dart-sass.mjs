@@ -7,8 +7,8 @@
  *   Embedded Dart Sass 最高只有 1.62.1，直接用会构建失败。
  *   同时不能依赖 npm 上的 `sass` 包：那是 dart2js 生成的 JS 包装器，
  *   Hugo 以可执行文件方式调用它会报 "got unexpected EOF when executing sass"。
- *   因此这里下载官方 standalone 二进制（真正的可执行文件），配合环境变量
- *   HUGO_SASS_BINARY 使用。
+ *   因此这里下载官方 standalone 二进制（真正的可执行文件），
+ *   并通过 node_modules/.bin 垫片让 Hugo 从 PATH 找到它。
  *
  * 用法：
  *   node scripts/install-dart-sass.mjs            # 安装到 .sass/
@@ -18,7 +18,7 @@
  * 仅使用 Node 内置模块，无第三方依赖。
  */
 import { createWriteStream } from 'node:fs';
-import { mkdir, rm, chmod, cp, readdir } from 'node:fs/promises';
+import { mkdir, rm, chmod, cp, readdir, symlink, lstat } from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -76,7 +76,7 @@ function resolveAsset() {
 
   if (!platformMap[platform]) {
     throw new Error(
-      `不支持的平台：${platform}。请手动安装 Dart Sass >= 1.99.0 并设置 HUGO_SASS_BINARY。`,
+      `不支持的平台：${platform}。请手动安装 Dart Sass >= 1.99.0 并确保它在 PATH 中。`,
     );
   }
 
@@ -94,6 +94,52 @@ async function download(url, dest) {
     throw new Error(`下载失败 ${res.status} ${res.statusText}：${url}`);
   }
   await pipeline(res.body, createWriteStream(dest));
+}
+
+/**
+ * 把 sass 可执行文件垫片到 node_modules/.bin/sass。
+ *
+ * 为什么需要：
+ *   Cloudflare Pages 执行用户构建命令时，环境来自 npm（npm clean-install），
+ *   而 npm 会把 node_modules/.bin 加入子进程的 PATH。
+ *   有了这个垫片，裸 `hugo` 也能在 PATH 里找到正确的 Dart Sass，
+ *   不必再单独设置任何环境变量。
+ *
+ * 若 node_modules/.bin/sass 已存在且不是我们的链接（例如装了 npm 的 sass 包，
+ * 那是 dart2js 的 JS 包装器，Hugo 调用会报 EOF），则保留原样并给出提示。
+ */
+async function linkIntoNodeBin(bin) {
+  const binDir = path.resolve('node_modules', '.bin');
+  const linkPath = path.join(binDir, 'sass');
+
+  try {
+    await mkdir(binDir, { recursive: true });
+  } catch {
+    return null;
+  }
+
+  try {
+    const st = await lstat(linkPath);
+    if (st.isSymbolicLink()) {
+      await rm(linkPath, { force: true });
+    } else {
+      console.log(
+        `[dart-sass] 提示：${linkPath} 已存在且不是符号链接，保留不动；` +
+          `裸 hugo 请改用 PATH 方式（把 sass 所在目录加入 PATH）`,
+      );
+      return null;
+    }
+  } catch {
+    // 不存在，正常情况
+  }
+
+  try {
+    await symlink(path.resolve(bin), linkPath);
+    return linkPath;
+  } catch (err) {
+    console.log(`[dart-sass] 提示：创建 PATH 垫片失败（${err.message}）`);
+    return null;
+  }
 }
 
 async function main() {
@@ -126,7 +172,12 @@ async function main() {
   const installed = stdout.trim();
   assertMinVersion(parseVersion(installed), installed);
   console.log(`[dart-sass] 安装完成：${installed}`);
-  console.log(`[dart-sass] HUGO_SASS_BINARY=${bin}`);
+  console.log(`[dart-sass] sass 路径=${bin}`);
+
+  const shim = await linkIntoNodeBin(bin);
+  if (shim) {
+    console.log(`[dart-sass] 已垫片到 PATH：${shim}`);
+  }
 
   await rm(TMP_DIR, { recursive: true, force: true });
 

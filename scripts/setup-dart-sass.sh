@@ -33,7 +33,7 @@ case "$(uname -s)/$(uname -m)" in
   Darwin/arm64)   PLATFORM="macos-arm64" ;;
   *)
     echo "不支持的平台：$(uname -s)/$(uname -m)" >&2
-    echo "请手动安装 Dart Sass >= ${MIN}，并设置 HUGO_SASS_BINARY 指向它。" >&2
+    echo "请手动安装 Dart Sass >= ${MIN}，并确保 sass 在 PATH 中。" >&2
     exit 1
     ;;
 esac
@@ -90,4 +90,4 @@ if [ "$MA" -lt "$MIN_MA" ] || { [ "$MA" -eq "$MIN_MA" ] && [ "$MI" -lt "$MIN_MI"
 fi
 
 echo "[dart-sass] 完成。构建本机预览："
-echo "  HUGO_SASS_BINARY=${DEST}/sass hugo server -D --disableFastRender"
+echo "  PATH=\"$PWD/${DEST}:$PATH\" hugo server -D --disableFastRender"

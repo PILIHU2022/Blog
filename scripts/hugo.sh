@@ -5,7 +5,7 @@
 # 目的：FixIt v1 必须有 Dart Sass 才能编译 SCSS。直接运行 hugo 时
 #       Hugo 只会在 PATH 里找 sass，找不到就报
 #       "You need to install Dart Sass"，非常难定位。
-#       本脚本负责把 HUGO_SASS_BINARY 指向仓库内的 .sass/sass。
+#       本脚本负责把仓库内的 .sass/ 加入 PATH，让 Hugo 找到它。
 #
 # 用法：
 #   bash scripts/hugo.sh server -D --disableFastRender   # 本地预览
@@ -57,6 +57,11 @@ command -v hugo >/dev/null 2>&1 || {
   exit 1
 }
 
-# 相对路径由 Hugo 按项目根目录解析
-export HUGO_SASS_BINARY="$SASS_BIN"
+# 把 sass 所在目录加入 PATH。
+# 注意：不要用 HUGO_SASS_BINARY（Hugo 不认这个变量名）；
+# Hugo 实际支持 DART_SASS_BINARY，但显式指定会受 security.exec.allow
+# 白名单限制，需要额外配置才能用。走 PATH 查找最省事。
+PATH="$(cd "$(dirname "$SASS_BIN")" && pwd):${PATH}"
+export PATH
+
 exec hugo "$@"
