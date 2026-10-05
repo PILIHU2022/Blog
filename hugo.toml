@@ -135,8 +135,9 @@ typeit = false
 
 # 站点副标题（首页 typeit 动画）
 [params.header.subtitle]
-name = "记录与分享"
-typeit = true
+# 按需求不在主页显示副标题，故留空并关闭打字动画
+name = ""
+typeit = false
 
 # 搜索：使用内置 Fuse.js 全文搜索，索引由主题自动生成
 [params.search]
@@ -151,7 +152,8 @@ enable = true
 avatar_url = ""
 # 显示在头像下方的名字
 title = "Spark"
-subtitle = "记录与分享"
+# 按需求主页不显示副标题，故留空
+subtitle = ""
 typeit = false
 # 是否显示社交链接（Email 等）
 social = true
@@ -164,9 +166,18 @@ author = true
 # 站点创建年份，用于页脚版权区间，例如显示 2026 - 2027
 since = "2026"
 
+# 右上角 GitHub 角标按钮，指向本博客仓库
+[params.github_corner]
+enable = true
+permalink = "https://github.com/PILIHU2022/Blog"
+title = "在 GitHub 上查看本博客源码"
+# 角标出现位置："start"（左）| "end"（右）
+position = "end"
+
 # 社交账号（留空即不显示）。Email 的 mailto: 前缀由主题内置映射处理。
 # 完整可用列表见主题 hugo.toml 的 [params.social] 段。
 [params.social]
-GitHub = ""
+# GitHub 用户名，图标按钮指向 https://github.com/<用户名>
+GitHub = "PILIHU2022"
 Email = "Spark-CN@outlook.com"
 RSS = true
