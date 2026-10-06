@@ -163,8 +163,24 @@ social = true
 enable = true
 copyright = true
 author = true
-# 站点创建年份，用于页脚版权区间，例如显示 2026 - 2027
-since = "2026"
+# 站点创建年份。主题渲染规则：since 小于当前年份时显示 "since - 当前年份"，
+# 因此这里填 2022 会显示为 "2022 - 2026"，并在 2027 年自动变成 "2022 - 2027"。
+since = "2022"
+# 版权署名后的许可证文本。
+# 注意：这里必须显式写出，不能留空——空字符串会覆盖主题默认值而不是继承。
+license = '<a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>'
+
+# 站点持续运行时间（页脚 "Runs for ..."）。
+# value 为起算时间，前端按 当前时间 - value 计算并实时刷新。
+# 2022-01-01 00:00 起算：到 2026-10-06 恰好 1739 天。
+[params.footer.site_time]
+enable = true
+# 图标是否带跳动动画
+animate = true
+icon = "fa-solid fa-heartbeat"
+# 显示在时间前面的文字（留空则只显示对应语言的默认前缀）
+pre = ""
+value = "2022-01-01T00:00:00+08:00"
 
 # 右上角 GitHub 角标按钮，指向本博客仓库
 [params.github_corner]
