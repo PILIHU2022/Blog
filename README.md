@@ -61,13 +61,14 @@ hugo new content posts/文章名.md      # 新建文章
 │   └── posts/                   # 文章目录
 ├── static/
 │   └── images/avatar.webp       # 头像（对外路径 /images/avatar.webp）
-├── vercel.json                  # Vercel 项目配置（仅声明输出目录）
+├── vercel.json                  # Vercel 项目配置（输出目录 + 调用 build.sh）
+├── build.sh                     # Vercel 构建脚本（钉死 Hugo / Dart Sass 版本）
 └── themes/
     └── FixIt/                   # 主题（git submodule，跟踪 main 分支）
 ```
 
 以下均已忽略，不进入版本库：
-`public/`、`resources/`、`node_modules/`、`.sass/`、`.hugo_build.lock`。
+`public/`、`resources/`、`node_modules/`、`.sass/`、`.hugo_build.lock`、`.vercel/`。
 
 ## 当前站点配置
 
@@ -77,10 +78,10 @@ hugo new content posts/文章名.md      # 新建文章
 | `baseURL` | `https://blog.sparkzh.top/` |
 | 作者 | Spark |
 | 邮箱 | Spark-CN@outlook.com |
-| 头像 | `/images/avatar.png` |
+| 头像 | `/images/avatar.webp` |
 | 首页 profile | 已启用（头像、名字、社交链接） |
 | 搜索 | 内置 Fuse.js |
-| 页脚起始年份 | 2026 |
+| 页脚起始年份 | 2022 |
 
 站点配置刻意**没有复制**主题那份 2000+ 行的默认配置，只写必要项，其余通过这三行继承：
 
@@ -125,41 +126,81 @@ git add themes/FixIt && git commit -m "chore(theme): bump FixIt to latest main"
 ### 一次性配置
 
 1. Vercel 控制台 → **Add New** → **Project** → 选择 `PILIHU2022/Blog`
-2. Framework Preset 选 **Hugo**
+2. Framework Preset 选 **Hugo**（本站不使用预设的构建流程，原因见下）
 3. 直接 **Deploy**
 
-`vercel.json`：
+`vercel.json` 把安装与构建都交给仓库里的 `build.sh`：
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "git submodule update --init --recursive",
-  "buildCommand": "hugo --gc --minify",
+  "installCommand": "",
+  "buildCommand": "chmod a+x build.sh && ./build.sh",
   "outputDirectory": "public"
 }
 ```
 
+### ⚠️ 为什么必须用 `build.sh`，而不是 Vercel 的 Hugo 预设
+
+Vercel 的 Hugo 预设默认装的 Hugo 极旧（部署日志里是 **0.58.2**）。而本站的配置
+文件叫 `hugo.toml`，这个**文件名是 Hugo 0.110 才支持的**，更早的版本只认
+`config.toml`。于是旧 Hugo 会把整份站点配置静默忽略：
+
+- `title` / `baseURL` / `theme` / `outputs` 全部丢失，语言回落到 `en`
+- 没有主题 → 构建日志出现 `found no layout file for "HTML"`，**没有任何 HTML 页面**
+- 只剩 Hugo 内建的 RSS / sitemap 输出，`public/` 里只有 `index.xml`
+- 构建退出码是 0，Vercel 照常发布 → **访问首页返回的是 RSS 的 XML**
+
+用旧版 Hugo 跑同一份仓库可以直接看到这个现象：
+
+```bash
+$ hugo config | grep -E '^(title|baseurl|theme)'   # Hugo 0.58.2：什么都没有
+$ ls public                                        # 只有 XML，没有 index.html
+index.xml  sitemap.xml  categories/  posts/  tags/
+
+$ hugo config | grep -E '^(title|baseurl|theme)'   # Hugo 0.167.0：正常
+title = "Spark's Blog"
+baseurl = 'https://blog.sparkzh.top/'
+theme = ['FixIt']
+```
+
+`build.sh`（按 [Hugo 官方 Host on Vercel 指南](https://gohugo.io/host-and-deploy/host-on-vercel/)
+编写）把工具版本钉死在仓库里，Vercel 侧不需要任何环境变量：
+
+| 工具 | 版本 | 原因 |
+| --- | --- | --- |
+| Hugo extended | `0.167.0` | FixIt v1 要求 `>= 0.166.0`，且必须是 extended |
+| Dart Sass | `1.105.1` | FixIt v1 要求 `>= 1.99.0` |
+
+除了装工具，脚本还负责几件必须的事：初始化 submodule、`git fetch --unshallow`
+（`enableGitInfo = true` 需要完整历史）、打印实际使用的工具版本，并在构建后
+**校验 `public/index.html` 是否真的生成**。最后这条很关键：主题缺失或 Hugo
+版本过旧时构建会直接失败，而不是以"只有 XML"的产物静默上线。
+
 ### ⚠️ 为什么必须拉取 submodule
 
 主题以 **git submodule** 形式存放在 `themes/FixIt`。**Vercel 克隆仓库时不会自动
-初始化 submodule**，所以主题目录会是空的。此时的症状很有迷惑性：
+初始化 submodule**，主题目录会是空的，症状与上面完全一样（只有 RSS/sitemap，
+首页返回 XML）。`build.sh` 里已包含 `git submodule update --init --recursive`，
+并且在主题缺失（没有 `themes/FixIt/theme.toml`）时直接报错退出。
 
-- 站点能"构建成功"，但 Hugo 警告 `found no layout file for "HTML"`
-- 只有内建的 RSS/sitemap 能生成，**所有 HTML 页面与 CSS 都缺失**（访问 `/` 会
-  返回 RSS 的 XML）
-- 语言回落到 EN，`Static files` 从 71 变成 1，构建时间从 ~600ms 变成 ~30ms
+### 部署后如何确认修好了
 
-因此 `installCommand` 必须执行 `git submodule update --init --recursive`。
-这是本项目在 Vercel 上唯一需要额外配置的地方。
+Vercel 构建日志里应当出现：
 
-> 如果访问站点首页看到的是 XML 而不是网页，先检查 Vercel 构建日志里有没有
-> `found no layout file` —— 有的话就是主题没拉下来。
+```
+Tool versions:
+  Dart Sass: 1.105.1
+  Hugo:      hugo v0.167.0+extended ...
+Generated 123 HTML file(s).
+```
 
-### 关于 Hugo 与 Dart Sass
+如果 `Hugo:` 一行不是 0.167.0，或者末尾没有 `Generated ... HTML file(s)`，
+说明构建没有走到 `build.sh` —— 多半是 Vercel 项目里的
+**Build & Development Settings** 被手动覆盖过（面板上的覆盖优先于 `vercel.json`），
+清掉覆盖再重新部署即可。
 
-实测 Vercel 的 Hugo 框架预设自带满足 FixIt v1 要求的 Hugo（>= 0.166.0）与
-Dart Sass，因此**不需要**安装 Dart Sass，也**不需要**自定义构建脚本，只需
-`hugo --gc --minify`。
+访问 `/` 应返回网页；RSS 在 `/index.xml`，站点地图在 `/sitemap.xml`。
 
 ### 自定义域名
 
