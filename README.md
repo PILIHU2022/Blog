@@ -126,30 +126,40 @@ git add themes/FixIt && git commit -m "chore(theme): bump FixIt to latest main"
 
 1. Vercel 控制台 → **Add New** → **Project** → 选择 `PILIHU2022/Blog`
 2. Framework Preset 选 **Hugo**
-3. 直接 **Deploy**，**不需要任何环境变量，也没有构建脚本**
+3. 直接 **Deploy**
 
-`vercel.json` 只做一件事——声明 Hugo 的输出目录（Vercel 的 Hugo 预设默认
-也是 `public`，这里显式写出来是为了不依赖预设默认值）：
+`vercel.json`：
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "git submodule update --init --recursive",
+  "buildCommand": "hugo --gc --minify",
   "outputDirectory": "public"
 }
 ```
 
-> **实测确认**：Vercel 的 Hugo 框架预设可以直接构建本站点，其环境已自带
-> Dart Sass 与满足 FixIt v1 要求的 Hugo 版本（>= 0.166.0），因此**无需**
-> 自定义构建命令，也无需安装 Dart Sass。
->
-> 这一点与 Cloudflare 不同：Cloudflare 的构建镜像默认 Hugo 为 0.147.7
-> 且不带 Dart Sass，所以之前才需要环境变量与安装脚本。迁移到 Vercel 后
-> 这些绕行手段全部删除。
+### ⚠️ 为什么必须拉取 submodule
 
-### 主题 submodule
+主题以 **git submodule** 形式存放在 `themes/FixIt`。**Vercel 克隆仓库时不会自动
+初始化 submodule**，所以主题目录会是空的。此时的症状很有迷惑性：
 
-Vercel 克隆仓库时会自动初始化 Git submodule（`themes/FixIt`），无需额外配置。
-若某次部署日志显示主题目录为空，检查仓库的 `.gitmodules` 是否被改动。
+- 站点能"构建成功"，但 Hugo 警告 `found no layout file for "HTML"`
+- 只有内建的 RSS/sitemap 能生成，**所有 HTML 页面与 CSS 都缺失**（访问 `/` 会
+  返回 RSS 的 XML）
+- 语言回落到 EN，`Static files` 从 71 变成 1，构建时间从 ~600ms 变成 ~30ms
+
+因此 `installCommand` 必须执行 `git submodule update --init --recursive`。
+这是本项目在 Vercel 上唯一需要额外配置的地方。
+
+> 如果访问站点首页看到的是 XML 而不是网页，先检查 Vercel 构建日志里有没有
+> `found no layout file` —— 有的话就是主题没拉下来。
+
+### 关于 Hugo 与 Dart Sass
+
+实测 Vercel 的 Hugo 框架预设自带满足 FixIt v1 要求的 Hugo（>= 0.166.0）与
+Dart Sass，因此**不需要**安装 Dart Sass，也**不需要**自定义构建脚本，只需
+`hugo --gc --minify`。
 
 ### 自定义域名
 
