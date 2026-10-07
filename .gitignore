@@ -63,6 +63,9 @@ desktop.ini
 .dart_tool/
 /sass/
 /dart-sass/
-# Dart Sass 安装目标（仓库内共享，两个协作者与 CI 都会用到）
+# Dart Sass 安装目标
 node_modules/.dart-sass/
 /.sass/
+
+# Vercel 构建缓存（build.sh 里 HUGO_CACHEDIR 指向这里）
+/.vercel/

@@ -10,49 +10,28 @@
 | Hugo | `>= 0.166.0` **extended** | 0.167.0 extended |
 | Dart Sass | `>= 1.99.0` | 1.105.1 |
 | Git | 任意较新版本 | 2.56.0 |
-| Node.js | `>= 22`（仅 CI 需要） | 22.23.3 |
 
 > **为什么必须要 Dart Sass？**
 > FixIt 的样式（`assets/scss/`）用现代 SCSS 编写，必须由 Dart Sass 编译成 CSS。
 > 没有它构建会直接报错：`You need to install Dart Sass`。
 > Hugo 内嵌的 libsass 已弃用、编不了 FixIt v1 的语法，所以**无法绕过**。
 
-**推荐：把 Dart Sass 装在系统路径**（Arch Linux）：
+## 首次配置（每个协作者只需一次）
+
+```bash
+git clone --recurse-submodules <仓库地址> blog && cd blog
+hugo server -D --disableFastRender
+```
+
+本机需要已安装 **Dart Sass >= 1.99.0**（FixIt v1 必需）。Arch Linux：
 
 ```bash
 sudo pacman -S dart-sass
 sass --version        # 应 >= 1.99.0
 ```
 
-装到 `/usr/bin/sass` 后，**所有用户都可用，裸跑 `hugo` 就能构建**，
-不需要任何环境变量——这是最省心的方式。
-
-## 首次配置（每个协作者只需一次）
-
-本仓库由两个系统用户共同维护（`Spark` 与 `dsh`），各自的家目录都是 `700`，
-**互相读不到对方装在 `$HOME` 里的工具**。
-
-**首选做法**：用包管理器把 Dart Sass 装到系统路径（见上），两个用户都能用，
-之后所有命令就是普通 `hugo` 命令，无需任何包装。
-
-**备选做法**（无 root 权限、或系统包太旧时）：把 Dart Sass 装到仓库内的
-`.sass/`（该目录已在 .gitignore 中）：
-
-```bash
-git clone --recurse-submodules <仓库地址> blog && cd blog
-hugo server -D --disableFastRender      # 已装系统 sass 时，这样即可
-```
-
-```bash
-node scripts/install-dart-sass.mjs        # 下载到 .sass/，并垫片到 node_modules/.bin
-```
-
-安装器会硬校验版本不低于 1.99.0，避免静默回退到旧版本、等到编译 SCSS 时
-才出一个难懂的错。它同时把二进制垫片到 `node_modules/.bin/sass`，因此之后
-裸 `hugo` 也能从 `PATH` 找到它。
-
-> 本机已用系统包管理器装好 Dart Sass 时，`npm install` 会自动跳过下载
-> （`postinstall` 带 `--check`，检测到系统 sass 即直接返回）。
+> 装到系统路径后两个协作者都能用，且裸跑 `hugo` 即可。
+> 不用系统包管理器时，也可下载官方 standalone 二进制放到 `PATH` 中的任意位置。
 
 ## 本地开发
 
@@ -67,12 +46,8 @@ hugo server -D --disableFastRender
 ```bash
 hugo server -D --disableFastRender   # 本地预览（含草稿）
 hugo --gc --minify                   # 生产构建
-hugo new content posts/文章名.md      # 新建文章（不需要 sass）
+hugo new content posts/文章名.md      # 新建文章
 ```
-
-> 如果环境里没有可用的 Dart Sass，先执行一次
-> `node scripts/install-dart-sass.mjs`（或 `npm install`）把它装到 `.sass/`，
-> 之后上面的 `hugo` 命令照常可用。
 
 ## 目录结构
 
@@ -86,9 +61,8 @@ hugo new content posts/文章名.md      # 新建文章（不需要 sass）
 │   └── posts/                   # 文章目录
 ├── static/
 │   └── images/avatar.webp       # 头像（对外路径 /images/avatar.webp）
-├── scripts/
-│   └── install-dart-sass.mjs    # 无系统 Dart Sass 时安装它（本地与 CI 通用）
-├── package.json                 # postinstall 调用上面的安装器（带 --check）
+├── build.sh                     # Vercel 构建脚本（钉死 Hugo 与 Dart Sass 版本）
+├── vercel.json                  # Vercel 项目配置
 └── themes/
     └── FixIt/                   # 主题（git submodule，跟踪 main 分支）
 ```
@@ -147,90 +121,48 @@ git add themes/FixIt && git commit -m "chore(theme): bump FixIt to latest main"
 > v1.0.0 计划 2027 上半年发布。升级后请务必本地构建验证再推送。
 > 如果希望更保守，可改用 `git -C themes/FixIt checkout v1.0.0-alpha.3` 之类的 tag。
 
-## 部署：GitHub + Cloudflare Pages
+## 部署：GitHub + Vercel
 
 ### 一次性配置
 
-在 Cloudflare Dashboard → **Workers & Pages** → **Create** → **Pages** →
-**Connect to Git**，选择本仓库，按下表填写：
+1. Vercel 控制台 → **Add New** → **Project** → 选择 `PILIHU2022/Blog`
+2. Framework Preset 选 **Hugo**（或留空，配置已写在 `vercel.json` 中）
+3. 直接 **Deploy**，无需填写任何环境变量
 
-| 配置项 | 值 |
-| --- | --- |
-| Production branch | `main` |
-| Build command | `hugo --gc --minify` |
-| Build output directory | `public` |
-| 环境变量 `HUGO_VERSION` | `0.167.0`（**必须设**，见下） |
-| 环境变量 `DART_SASS_BINARY` | 不需要（见下节，靠 PATH 垫片解决） |
+`vercel.json` 的内容：
 
-### ⚠️ 必须设置 `HUGO_VERSION`
-
-Cloudflare Pages 构建镜像的 **Hugo 默认版本是 0.147.7**（见
-[Build image 文档](https://developers.cloudflare.com/pages/configuration/build-image/)），
-而 FixIt v1 要求 **>= 0.166.0**，并且主题用到 `hugo.Data`（该函数 **v0.156.0** 才引入）。
-版本不足时会在处理 `themes/FixIt/content/_authors/_content.gotmpl` 时报：
-
-```
-can't evaluate field Data in type interface {}
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "",
+  "buildCommand": "bash build.sh",
+  "outputDirectory": "public"
+}
 ```
 
-这个错误完全看不出版本问题，很容易误判成主题或配置错误。
+### 为什么用 `build.sh`
 
-**在 Cloudflare 面板设置**：`Settings` → `Environment variables`
-→ 添加 `HUGO_VERSION` = `0.167.0`，且 **Production 与 Preview 两个作用域都要加**。
-设置后必须重新触发一次部署（仅保存变量不会重建）。
+这是 [Hugo 官方 Host on Vercel 指南](https://gohugo.io/host-and-deploy/host-on-vercel/)
+推荐的做法。原因：**Vercel 默认不提供 Dart Sass，且默认 Hugo 版本可能低于
+FixIt v1 要求的 0.166.0**。`build.sh` 负责：
 
-> Hugo 版本**只能**通过该环境变量覆盖——Cloudflare 的版本覆盖表中 Hugo 一行
-> 没有"文件"列，不存在 `.hugo-version` 之类的仓库内声明方式。
+1. 初始化主题 submodule（`git submodule update --init --recursive`）
+2. 下载 **Dart Sass 1.105.1** 并加入 `PATH`
+3. 下载 **Hugo extended 0.167.0** 并加入 `PATH`
+4. 把工具版本打印到构建日志，便于核对
+5. 执行 `hugo --gc --minify`
 
-### ⚠️ Dart Sass：为什么不需要环境变量
+版本都写死在脚本顶部，**因此 Vercel 侧不需要任何环境变量**，也不受平台
+默认版本变动影响。升级时改脚本里的版本号即可。
 
-这是本项目部署时**最容易踩的坑**，而且我踩过一次错误的坑，务必按下面做。
+> 脚本里保留了 Go 与 Node 的安装分支，但**只有**仓库存在 `go.mod`
+> （Hugo Modules）或 `package-lock.json`（npm 依赖）时才会触发。
+> 本项目用 Git submodule + 无 npm 依赖，这两步会自动跳过。
 
-**背景**：Cloudflare Pages 构建镜像自带的是 **Embedded Dart Sass，最高只有 1.62.1**
-（见 [Build image 文档](https://developers.cloudflare.com/pages/configuration/build-image/)），
-而 FixIt v1 要求 **≥ 1.99.0**。直接用镜像自带的版本会构建失败。
+### 自定义域名
 
-同时**不能**用 npm 上的 `sass` 包：它是 dart2js 生成的 JS 包装器，Hugo 调用会报：
-
-```
-TOCSS-DART: failed to transform "/scss/main.scss": got unexpected EOF when executing "sass".
-```
-
-**正确做法：靠 PATH 查找，不要设环境变量。**
-
-| 方式 | 是否可用 | 说明 |
-| --- | --- | --- |
-| 把 sass 放进 `PATH` | ✅ **推荐** | Hugo 按 PATH 找 `sass`，无需任何配置 |
-| `DART_SASS_BINARY=...` | ⚠️ 需额外配置 | Hugo 确实支持这个变量，但显式指定会受 `security.exec.allow` 白名单限制，报 `not whitelisted in policy` |
-| `HUGO_SASS_BINARY=...` | ❌ **不存在** | Hugo 从未支持这个变量名，设了也没有任何效果 |
-
-本项目的实现是一条链：
-
-1. `package.json` 的 `postinstall` 在 Cloudflare 的 `npm clean-install` 阶段运行；
-2. `scripts/install-dart-sass.mjs` 下载官方 **standalone 二进制** 到 `.sass/`
-   （真正的可执行文件，非 JS 包装器，仅用 Node 内置模块）；
-3. 它同时把该二进制**垫片**（符号链接）到 `node_modules/.bin/sass`；
-4. npm 会把 `node_modules/.bin` 加入子进程的 `PATH`，因此构建命令 **裸 `hugo`**
-   就能在 PATH 里找到正确的 Dart Sass。
-
-因此 Cloudflare 上**只需要设置 `HUGO_VERSION`**，sass 部分无需任何环境变量。
-
-> 关键点：**sass 必须能从 `PATH` 找到**。本仓库通过 postinstall 把二进制垫片到
-> `node_modules/.bin/sass`，而 npm 会把这个目录放进子进程的 `PATH`，
-> 所以裸 `hugo` 就能用上正确的 Dart Sass。
-
-### 部署相关的免费额度（Free 计划）
-
-- 每月 500 次构建，单次构建 20 分钟超时
-- 站点最多 20,000 个文件，单文件最大 25 MiB
-- 参考：[Pages Limits](https://developers.cloudflare.com/pages/platform/limits/)
-
-当前站点产物约 2.5 MB，余量充足。
-
-### 回滚
-
-Cloudflare Pages 每次部署都是一个不可变版本，控制台可一键回滚到任意历史部署。
-配合 Git 历史，形成双重回退保障。
+在 Vercel 项目的 **Settings → Domains** 添加 `blog.sparkzh.top` 并按其提示
+配置 DNS。`hugo.toml` 里的 `baseURL` 已是该域名，无需改动。
 
 ## 共享仓库的权限注意事项
 
@@ -269,19 +201,13 @@ git config --global --add safe.directory "$(pwd)/themes/FixIt"
 command -v sass && sass --version      # 期望 /usr/bin/sass 且 >= 1.99.0
 ```
 
-- 若找不到：`sudo pacman -S dart-sass`（Arch），或改用包装脚本
-  `node scripts/install-dart-sass.mjs`，然后重新构建
-- 若找到但版本过低：用包装脚本走仓库内的 `.sass/`，安装脚本会硬校验版本
+- 若找不到：`sudo pacman -S dart-sass`（Arch），或从
+  [dart-sass releases](https://github.com/sass/dart-sass/releases) 下载 standalone
+  二进制并放到 `PATH` 中的任意目录
+- 若找到但版本过低：同上，换用 >= 1.99.0 的版本
 - 注意 `~/.local/bin/sass` 之类会遮蔽系统版本，`command -v sass` 显示的实际路径才算数
 
-**`.sass/sass: Permission denied`**
-安装产物丢了可执行位（共享目录的默认 ACL 可能把权限压成 `660`）。
-确认后补上即可：
-
-```bash
-ls -l .sass/sass .sass/src/dart        # 应为 755
-chmod 755 .sass/sass .sass/src/dart    # 若不足则补
-```
+> Vercel 构建时不需要你处理这些：`build.sh` 会自动下载正确版本。
 
 **内容日期在未来导致页面不生成**
 本项目已开启 `buildFuture = true`，可以按日期做定时发布。
