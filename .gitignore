@@ -66,6 +66,3 @@ desktop.ini
 # Dart Sass 安装目标
 node_modules/.dart-sass/
 /.sass/
-
-# Vercel 构建缓存（build.sh 里 HUGO_CACHEDIR 指向这里）
-/.vercel/

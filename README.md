@@ -61,8 +61,7 @@ hugo new content posts/文章名.md      # 新建文章
 │   └── posts/                   # 文章目录
 ├── static/
 │   └── images/avatar.webp       # 头像（对外路径 /images/avatar.webp）
-├── build.sh                     # Vercel 构建脚本（钉死 Hugo 与 Dart Sass 版本）
-├── vercel.json                  # Vercel 项目配置
+├── vercel.json                  # Vercel 项目配置（仅声明输出目录）
 └── themes/
     └── FixIt/                   # 主题（git submodule，跟踪 main 分支）
 ```
@@ -126,38 +125,31 @@ git add themes/FixIt && git commit -m "chore(theme): bump FixIt to latest main"
 ### 一次性配置
 
 1. Vercel 控制台 → **Add New** → **Project** → 选择 `PILIHU2022/Blog`
-2. Framework Preset 选 **Hugo**（或留空，配置已写在 `vercel.json` 中）
-3. 直接 **Deploy**，无需填写任何环境变量
+2. Framework Preset 选 **Hugo**
+3. 直接 **Deploy**，**不需要任何环境变量，也没有构建脚本**
 
-`vercel.json` 的内容：
+`vercel.json` 只做一件事——声明 Hugo 的输出目录（Vercel 的 Hugo 预设默认
+也是 `public`，这里显式写出来是为了不依赖预设默认值）：
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "",
-  "buildCommand": "bash build.sh",
   "outputDirectory": "public"
 }
 ```
 
-### 为什么用 `build.sh`
+> **实测确认**：Vercel 的 Hugo 框架预设可以直接构建本站点，其环境已自带
+> Dart Sass 与满足 FixIt v1 要求的 Hugo 版本（>= 0.166.0），因此**无需**
+> 自定义构建命令，也无需安装 Dart Sass。
+>
+> 这一点与 Cloudflare 不同：Cloudflare 的构建镜像默认 Hugo 为 0.147.7
+> 且不带 Dart Sass，所以之前才需要环境变量与安装脚本。迁移到 Vercel 后
+> 这些绕行手段全部删除。
 
-这是 [Hugo 官方 Host on Vercel 指南](https://gohugo.io/host-and-deploy/host-on-vercel/)
-推荐的做法。原因：**Vercel 默认不提供 Dart Sass，且默认 Hugo 版本可能低于
-FixIt v1 要求的 0.166.0**。`build.sh` 负责：
+### 主题 submodule
 
-1. 初始化主题 submodule（`git submodule update --init --recursive`）
-2. 下载 **Dart Sass 1.105.1** 并加入 `PATH`
-3. 下载 **Hugo extended 0.167.0** 并加入 `PATH`
-4. 把工具版本打印到构建日志，便于核对
-5. 执行 `hugo --gc --minify`
-
-版本都写死在脚本顶部，**因此 Vercel 侧不需要任何环境变量**，也不受平台
-默认版本变动影响。升级时改脚本里的版本号即可。
-
-> 脚本里保留了 Go 与 Node 的安装分支，但**只有**仓库存在 `go.mod`
-> （Hugo Modules）或 `package-lock.json`（npm 依赖）时才会触发。
-> 本项目用 Git submodule + 无 npm 依赖，这两步会自动跳过。
+Vercel 克隆仓库时会自动初始化 Git submodule（`themes/FixIt`），无需额外配置。
+若某次部署日志显示主题目录为空，检查仓库的 `.gitmodules` 是否被改动。
 
 ### 自定义域名
 
@@ -207,7 +199,7 @@ command -v sass && sass --version      # 期望 /usr/bin/sass 且 >= 1.99.0
 - 若找到但版本过低：同上，换用 >= 1.99.0 的版本
 - 注意 `~/.local/bin/sass` 之类会遮蔽系统版本，`command -v sass` 显示的实际路径才算数
 
-> Vercel 构建时不需要你处理这些：`build.sh` 会自动下载正确版本。
+> 以上只是本地开发时的排错。Vercel 构建环境自带 Dart Sass，无需处理这些。
 
 **内容日期在未来导致页面不生成**
 本项目已开启 `buildFuture = true`，可以按日期做定时发布。
