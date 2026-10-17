@@ -1,0 +1,73 @@
+---
+// The prose on this page is site copy, not UI chrome, so it intentionally lives
+// here rather than in `src/i18n/`.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../consts';
+import { t } from '../../i18n';
+---
+
+<BaseLayout title={t('about.title')} description={`关于 Spark，以及这个博客 — ${SITE.title}。`}>
+  <section class="page-head section">
+    <p class="eyebrow">{t('about.eyebrow')}</p>
+    <h1>写代码，也记录折腾的过程。</h1>
+    <p class="lead">
+      我是 Spark。这个博客从 2022 年开始记录我在 Linux、开发工具和自建服务上的实践，
+      以及那些最后被写进笔记里的坑。
+    </p>
+  </section>
+
+  <section class="section prose-grid">
+    <div>
+      <p class="eyebrow">简介</p>
+      <h2>把复杂的步骤，写成能照着做的笔记。</h2>
+    </div>
+    <div class="prose-stack">
+      <p>
+        平时主要使用 Arch Linux，桌面环境折腾过 Hyprland，编辑器是 Neovim。
+        博客里的文章多半来自实际使用：安装系统、配置显卡驱动、调整中文字体、
+        给编辑器接上格式化工具，或者把某个服务部署到 Cloudflare 和 Vercel。
+      </p>
+      <p>
+        写下来的原因很简单——同样的步骤下次还会用到，而互联网上的教程往往过期得很快。
+        这里的文章会尽量写清楚前提、命令和结果，方便未来的自己，也方便刚好路过的你。
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-label={t('about.ledgerLabel')}>
+    <div class="about-ledger">
+      <article>
+        <span>01</span>
+        <h3>系统与桌面</h3>
+        <p>Arch Linux 安装、AMD 显卡驱动、Hyprland 配置与全局黑暗模式。</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>工具与效率</h3>
+        <p>Neovim、ruff、Git、GPG，以及把日常流程打磨顺手的小工具。</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>联系</h3>
+        <p>
+          邮箱 <a href="mailto:Spark-CN@outlook.com">Spark-CN@outlook.com</a>，
+          代码在 <a href="https://github.com/PILIHU2022" rel="noopener noreferrer">GitHub</a>。
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section prose-grid about-closing">
+    <div>
+      <p class="eyebrow">写作</p>
+      <h2>保持好奇，保持记录。</h2>
+    </div>
+    <div class="prose-stack">
+      <p>
+        这个博客使用 Astro 和 Keel 主题构建，文章以 Markdown 保存，
+        搜索、RSS 与站点地图都在构建时生成。没有评论系统，也没有追踪脚本——
+        如果文章对你有帮助，或者发现了错误，欢迎直接发邮件告诉我。
+      </p>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+import { SITE } from '../consts';
+import { t } from '../i18n';
+
+const bundlePath = withBase('/pagefind/');
+---
+
+<BaseLayout title={t('search.title')} description={`搜索站内文章 — ${SITE.title}。`}>
+  <link slot="head" rel="stylesheet" href={`${bundlePath}pagefind-ui.css`} />
+  <section class="page-head section">
+    <p class="eyebrow">{t('search.eyebrow')}</p>
+    <h1>搜索文章。</h1>
+    <p class="lead">由 Pagefind 提供的纯静态全文搜索：索引在构建时生成，无需后端。</p>
+  </section>
+
+  <section class="section search-section" aria-label={t('search.sectionLabel')}>
+    <div id="search" data-bundle-path={bundlePath}>
+      <p class="search-fallback" set:html={t('search.fallback')} />
+    </div>
+    <script is:inline data-astro-rerun>
+      // `data-astro-rerun` re-runs this after each soft navigation, because the
+      // swap replaces `#search` with an empty container. `bundlePath` comes from
+      // a data attribute — `define:vars` would strip `data-astro-rerun` from the
+      // rendered tag. The IIFE keeps re-runs from redeclaring top-level consts;
+      // the UI script itself is only loaded once and reused on later visits.
+      (() => {
+        const container = document.getElementById('search');
+        if (!container) return;
+        const bundlePath = container.dataset.bundlePath;
+        const initSearch = () => {
+          container.querySelector('.search-fallback')?.remove();
+          new PagefindUI({
+            element: '#search',
+            bundlePath,
+            showImages: false,
+            showSubResults: true,
+            autofocus: true,
+            translations: {
+              placeholder: '搜索文章',
+              clear_search: '清除',
+              load_more: '加载更多结果',
+              search_label: '搜索本站',
+              filters_label: '筛选',
+              zero_results: '未找到与 [SEARCH_TERM] 相关的结果',
+              many_results: '找到 [COUNT] 条与 [SEARCH_TERM] 相关的结果',
+              one_result: '找到 1 条与 [SEARCH_TERM] 相关的结果',
+              alt_search: '未找到与 [SEARCH_TERM] 相关的结果，改为显示 [DIFFERENT_TERM] 的结果',
+              search_suggestion: '未找到相关结果，试试以下关键词：',
+              searching: '正在搜索 [SEARCH_TERM]…',
+            },
+          });
+        };
+        if (window.PagefindUI) {
+          initSearch();
+        } else {
+          const script = document.createElement('script');
+          script.src = `${bundlePath}pagefind-ui.js`;
+          script.onload = initSearch;
+          document.head.append(script);
+        }
+      })();
+    </script>
+  </section>
+</BaseLayout>

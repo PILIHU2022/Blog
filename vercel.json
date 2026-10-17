@@ -1,6 +1,34 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "",
-  "buildCommand": "chmod a+x build.sh && ./build.sh",
-  "outputDirectory": "public"
+  "framework": "astro",
+  "installCommand": "npm ci --include=dev",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "redirects": [
+    { "source": "/index.xml", "destination": "/rss.xml", "permanent": true },
+    { "source": "/posts/index.xml", "destination": "/rss.xml", "permanent": true },
+    { "source": "/sitemap.xml", "destination": "/sitemap-index.xml", "permanent": true },
+    { "source": "/archives", "destination": "/blog/", "permanent": true },
+    { "source": "/archives/", "destination": "/blog/", "permanent": true },
+    { "source": "/collections", "destination": "/blog/", "permanent": true },
+    { "source": "/collections/", "destination": "/blog/", "permanent": true },
+    { "source": "/offline", "destination": "/", "permanent": true },
+    { "source": "/offline/", "destination": "/", "permanent": true },
+    { "source": "/link", "destination": "/about/", "permanent": true },
+    { "source": "/link/", "destination": "/about/", "permanent": true },
+    { "source": "/_authors/:author*", "destination": "/about/", "permanent": true },
+    { "source": "/tags", "destination": "/blog/", "permanent": true },
+    { "source": "/tags/", "destination": "/blog/", "permanent": true },
+    { "source": "/categories", "destination": "/blog/", "permanent": true },
+    { "source": "/categories/", "destination": "/blog/", "permanent": true },
+    { "source": "/tags/arch", "destination": "/blog/tags/arch-linux", "permanent": true },
+    { "source": "/tags/arch/", "destination": "/blog/tags/arch-linux", "permanent": true },
+    { "source": "/categories/arch-linux", "destination": "/blog/tags/arch-linux", "permanent": true },
+    { "source": "/categories/guide", "destination": "/blog/tags/guides", "permanent": true },
+    { "source": "/categories/blog", "destination": "/blog/tags/blog", "permanent": true },
+    { "source": "/categories/:category*", "destination": "/blog/", "permanent": true },
+    { "source": "/tags/:tag*", "destination": "/blog/tags/:tag*", "permanent": true },
+    { "source": "/authors/:author*", "destination": "/about/", "permanent": true },
+    { "source": "/posts/:slug*", "destination": "/blog/:slug*", "permanent": true }
+  ]
 }

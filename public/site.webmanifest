@@ -1,0 +1,21 @@
+{
+  "name": "Spark's Blog",
+  "short_name": "Spark",
+  "description": "记录 Arch Linux、Hyprland、Neovim 与自建服务的实践笔记。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcfcfa",
+  "theme_color": "#252831",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
