@@ -188,10 +188,9 @@ a:not(.brand, .button):hover {
 }
 
 .brand-mark {
-  width: 0.95rem;
+  width: 1px;
   height: 1.85rem;
-  border-left: 1px solid var(--color-accent);
-  border-right: 1px solid var(--color-accent);
+  background: var(--color-accent);
 }
 
 .site-nav {
@@ -487,6 +486,22 @@ pre code {
   position: relative;
 }
 
+/* Fence language label, injected by CodeCopy.astro. */
+.code-lang {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.75rem;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+
 .code-copy {
   position: absolute;
   top: 0.6rem;
@@ -538,10 +553,7 @@ pre code {
 }
 
 .article-layout.no-toc .prose {
-  /* Article body is a touch larger than chrome text; because `--prose-width`
-     is in `ch`, this also widens the reading column at the same time. */
   max-width: var(--prose-width);
-  font-size: 1.125rem;
 }
 
 .index-sidebar,
@@ -795,6 +807,30 @@ pre code {
      is in `ch`, this also widens the reading column at the same time. */
   max-width: var(--prose-width);
   font-size: 1.125rem;
+}
+
+
+.prose table {
+  width: 100%;
+  margin-block: calc(var(--baseline) * 1.5);
+  border: 1px solid var(--color-line);
+  border-collapse: collapse;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.prose th,
+.prose td {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  background: var(--color-soft);
+  color: var(--color-text);
+  font-weight: 700;
 }
 
 .prose h2,
@@ -1159,6 +1195,11 @@ pre code {
 
   .note-row {
     grid-template-columns: 1fr;
+  }
+
+  .prose table {
+    display: block;
+    overflow-x: auto;
   }
 
   .site-footer {

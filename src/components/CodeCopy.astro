@@ -19,6 +19,17 @@
       pre.replaceWith(wrapper);
       wrapper.appendChild(pre);
 
+      // Show the fence language (lua, bash, ...) in the top-left corner.
+      // `plaintext` means the fence had no language, so it gets no label.
+      const language = pre.dataset.language;
+      if (language && !['plaintext', 'text', 'txt'].includes(language)) {
+        const label = document.createElement('span');
+        label.className = 'code-lang';
+        label.textContent = language;
+        label.setAttribute('data-pagefind-ignore', '');
+        wrapper.appendChild(label);
+      }
+
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'code-copy';
