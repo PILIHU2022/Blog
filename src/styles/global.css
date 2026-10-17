@@ -1,3 +1,15 @@
+/* Chinese webfont — LXGW WenKai Mono Screen (霞鹜文楷等宽 屏幕阅读版).
+   Subset to GB2312 level-1 + every character used on the site; Latin still
+   renders in the English faces below. Licensed under the SIL OFL 1.1, see
+   /fonts/OFL-LXGW-WenKai.txt and https://github.com/lxgw/LxgwWenKai-Screen. */
+@font-face {
+  font-family: 'LXGW WenKai Mono Screen';
+  src: url('/fonts/lxgw-wenkai-mono-screen-1.522.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   /* Change this one line to retune the theme accent. */
@@ -13,11 +25,13 @@
   --color-line: oklch(0.86 0.008 100);
   --color-line-strong: oklch(0.72 0.012 120);
   --color-soft: oklch(0.94 0.006 100);
-  --font-display: 'Fraunces Variable', 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC',
-    'Source Han Serif CN', 'Songti SC', Georgia, serif;
-  --font-body: 'Public Sans', 'Noto Sans SC', 'Noto Sans CJK SC', 'Source Han Sans SC',
-    'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  /* Latin faces stay first; CJK glyphs fall through to LXGW WenKai Mono. */
+  --font-display: 'Fraunces Variable', 'LXGW WenKai Mono Screen', 'Noto Serif SC',
+    'Noto Serif CJK SC', 'Source Han Serif SC', 'Source Han Serif CN', 'Songti SC', Georgia, serif;
+  --font-body: 'Public Sans', 'LXGW WenKai Mono Screen', 'Noto Sans SC', 'Noto Sans CJK SC',
+    'Source Han Sans SC', 'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', system-ui,
+    sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'LXGW WenKai Mono Screen', ui-monospace, monospace;
   --content-width: 1160px;
   --prose-width: 68ch;
   --page-pad: clamp(1rem, 3vw, 2rem);

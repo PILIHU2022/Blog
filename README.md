@@ -15,6 +15,7 @@
 | [Pagefind](https://pagefind.app/) | 构建时生成的纯静态全文搜索，无后端 |
 | Shiki | 代码高亮，浅色/深色双主题 |
 | satori + sharp | 构建时为每篇文章生成 1200×630 的 OG 图片 |
+| LXGW WenKai Mono Screen | 中文正文与标题字体，自托管 WOFF2 子集 |
 | Noto Serif SC | OG 图片中的中文显示（字体随 `@fontsource` 安装） |
 
 ## 环境要求
@@ -123,11 +124,25 @@ draft: false
 ### 配色与字体
 
 - 主色只有一行：`src/styles/global.css` 里的 `--color-accent`。
-- 拉丁文字使用自托管的 Fraunces / Public Sans / JetBrains Mono。
-- 中文标题优先使用系统中可用的 Noto Serif CJK SC / 思源宋体 / Songti，
-  正文回退到 Noto Sans CJK / 思源黑体 / 系统无衬线字体。
-  这样不需要为每个页面下载 1.5 MB 的中文字体；OG 图片则在构建时使用
-  `@fontsource/noto-serif-sc` 的中文子集。
+- 英文、数字与代码继续使用主题默认的自托管字体：
+  Fraunces（标题）、Public Sans（正文）、JetBrains Mono（代码）。
+- 中文使用 **LXGW WenKai Mono Screen**（霞鹜文楷等宽屏幕阅读版），
+  字体文件在 `public/fonts/lxgw-wenkai-mono-screen-1.522.woff2`。
+  来源：<https://github.com/lxgw/LxgwWenKai-Screen>，版本 v1.522。
+  字体栈里它排在英文字体之后，所以英文仍走默认字体，只有 CJK 字符会回退到文楷。
+- 中文字体是 GB2312 一级字（3,755 个常用字）+ 当前站点用字 + 常用标点的
+  WOFF2 子集，约 993 KiB。如果新增文章用到子集外的生僻字，会回退到系统
+  CJK 字体；重新生成子集：
+
+  ```bash
+  python3 -m pip install fonttools brotli
+  python3 scripts/subset-lxgw-font.py
+  ```
+
+  脚本会把 v1.522 的完整 TTF 下载到 `.cache/`（已忽略），再生成
+  `public/fonts/lxgw-wenkai-mono-screen-1.522.woff2`。
+- OG 图片仍在构建时使用 `@fontsource/noto-serif-sc` 的宋体子集，
+  与正文的手写体相互独立。
 
 ### 搜索
 
@@ -218,4 +233,7 @@ Pagefind 索引只在 `npm run build` 之后存在，`npm run dev` 中不可用�
 - 站点文章：**CC BY-NC-SA 4.0**（除非文章内另有说明）。
 - 主题与代码：**MIT**，见 [LICENSE](./LICENSE) 与
   [Astro Keel](https://github.com/kpab/astro-keel)。
+- 中文字体 LXGW WenKai Mono Screen 遵循 **SIL Open Font License 1.1**，
+  见 [public/fonts/OFL-LXGW-WenKai.txt](public/fonts/OFL-LXGW-WenKai.txt)；
+  子集化仅用于网页字体分发。
 - OG 图片使用 Noto Serif CJK SC 的子集，字体遵循 SIL Open Font License 1.1。
