@@ -1,0 +1,10 @@
+# Cloudflare Workers 静态资源响应头
+# 文档：https://developers.cloudflare.com/workers/static-assets/headers/
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 构建信息只给 Worker 和调试用，不参与缓存与搜索
+/_deploy.json
+  Cache-Control: no-store
+  X-Robots-Tag: noindex

@@ -1,0 +1,50 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+
+  // Worker 名称。旧的 Hugo 版本 Worker 叫 spark-blog，这里用 blog-astro 避免覆盖。
+  "name": "blog-astro",
+
+  // Worker 入口：除了静态资源，还提供 /api/* 监控接口。
+  "main": "./worker/index.ts",
+
+  // 建议随部署日期更新。
+  "compatibility_date": "2026-10-17",
+
+  // 保留 workers.dev 地址；不生成版本预览 URL（博客不需要）。
+  "workers_dev": true,
+  "preview_urls": false,
+
+  "assets": {
+    // Astro 的构建产物
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // 未命中的路径返回 dist/404.html
+    "not_found_handling": "404-page",
+    // /api/* 必须进入 Worker；其余请求由静态资源层直接返回
+    "run_worker_first": ["/api/*"],
+  },
+
+  "triggers": {
+    // 每 5 分钟检查一次 GitHub（UTC）。修改后需重新 deploy 才生效。
+    "crons": ["*/5 * * * *"],
+  },
+
+  "observability": {
+    "enabled": true,
+  },
+
+  "vars": {
+    "GITHUB_REPO": "PILIHU2022/Blog",
+    "GITHUB_BRANCH": "main",
+    // 触发后 15 分钟内不再重复触发同一个 commit
+    "DEPLOY_COOLDOWN_SECONDS": "900",
+  },
+
+  "kv_namespaces": [
+    {
+      "binding": "DEPLOY_STATE",
+      // 由 `npx wrangler kv namespace create DEPLOY_STATE` 创建
+      "id": "bdc609e5342945f5a8e5a48be27b67fb",
+    },
+  ],
+}

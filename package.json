@@ -9,6 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "postbuild": "pagefind --site dist",
+    "build:cf": "npm run build && node scripts/write-build-info.mjs",
+    "deploy": "wrangler deploy",
+    "check:worker": "tsc -p worker/tsconfig.json",
     "preview": "astro preview",
     "check": "astro check",
     "format": "prettier --write .",
@@ -27,12 +30,14 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@cloudflare/workers-types": "^5.20261016.1",
     "pagefind": "^1.5.2",
     "prettier": "^3.9.9",
     "prettier-plugin-astro": "^0.14.1",
     "satori": "^0.33.5",
     "sharp": "^0.35.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.151.1"
   },
   "private": true,
   "description": "Spark's Blog — Astro + Keel"

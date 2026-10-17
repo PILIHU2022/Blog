@@ -1,0 +1,49 @@
+# 旧 Hugo / FixIt 链接 → Astro 路由
+# 规则按顺序匹配，命中第一条即停止；所有静态规则放在动态规则/通配符之前。
+# 文档：https://developers.cloudflare.com/workers/static-assets/redirects/
+
+/index.xml /rss.xml 301
+/posts/index.xml /rss.xml 301
+/sitemap.xml /sitemap-index.xml 301
+
+/archives /blog/ 301
+/archives/ /blog/ 301
+/collections /blog/ 301
+/collections/ /blog/ 301
+/offline / 301
+/offline/ / 301
+/link /about/ 301
+/link/ /about/ 301
+
+/tags /blog/ 301
+/tags/ /blog/ 301
+/categories /blog/ 301
+/categories/ /blog/ 301
+
+# 旧标签 / 分类名的特例
+/tags/arch /blog/tags/arch-linux 301
+/tags/arch/ /blog/tags/arch-linux 301
+/categories/arch-linux /blog/tags/arch-linux 301
+/categories/arch-linux/ /blog/tags/arch-linux 301
+/categories/guide /blog/tags/guides 301
+/categories/guide/ /blog/tags/guides 301
+/categories/blog /blog/tags/blog 301
+/categories/blog/ /blog/tags/blog 301
+
+/authors /about/ 301
+/authors/ /about/ 301
+/posts /blog/ 301
+/posts/ /blog/ 301
+
+# 动态规则
+/categories/:category /blog/ 301
+/tags/:tag /blog/tags/:tag 301
+/authors/:author /about/ 301
+/posts/:slug /blog/:slug 301
+
+# 多级路径的兜底
+/_authors/* /about/ 301
+/tags/* /blog/tags/:splat 301
+/categories/* /blog/ 301
+/posts/* /blog/:splat 301
+/authors/* /about/ 301

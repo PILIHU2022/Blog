@@ -153,6 +153,35 @@ Pagefind 在 `npm run build` 的 `postbuild` 阶段扫描 `dist/`。
 搜索页是 `/search/`，开发服务器（`npm run dev`）中没有索引，需先构建再
 `npm run preview` 验证。
 
+## 部署到 Cloudflare Workers
+
+仓库已包含 Cloudflare Workers 部署配置：`wrangler.jsonc`（Worker 名 `blog-astro`）、
+`worker/index.ts`（静态站点 + GitHub 更新监控）、`scripts/write-build-info.mjs`
+（构建时写入 `dist/_deploy.json`）以及 `public/_redirects`、`public/_headers`。
+
+Worker 每 5 分钟对比 GitHub `main` 的 HEAD 与线上构建的 commit；发现更新时调用
+Workers Builds 的 Deploy Hook 触发重新构建。完整步骤、Secrets 配置、域名切换和
+故障排查见 [docs/cloudflare-workers-auto-deploy.md](docs/cloudflare-workers-auto-deploy.md)。
+
+本地检查：
+
+```bash
+npm run check:worker
+npm run build:cf
+npx wrangler deploy --dry-run
+```
+
+线上部署前需要：
+
+```bash
+npx wrangler login
+npx wrangler kv namespace create DEPLOY_STATE   # 把 id 填进 wrangler.jsonc
+npx wrangler deploy
+```
+
+然后在 Cloudflare Dashboard 连接 GitHub 仓库、创建 Deploy Hook，并设置
+`DEPLOY_HOOK_URL`、`GITHUB_TOKEN`、`MANUAL_DEPLOY_TOKEN` 等 secrets。
+
 ## 部署到 Vercel
 
 Vercel 项目使用 **Astro** 框架预设即可，仓库里的 `vercel.json` 已显式写明：
