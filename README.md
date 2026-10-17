@@ -15,7 +15,8 @@
 | [Pagefind](https://pagefind.app/) | 构建时生成的纯静态全文搜索，无后端 |
 | Shiki | 代码高亮，浅色/深色双主题 |
 | satori + sharp | 构建时为每篇文章生成 1200×630 的 OG 图片 |
-| NeoXiHei Code | 全站唯一字体：LXGW Neo XiHei 的等宽版（合并 M+ 1M），自托管子集 |
+| NeoXiHei Code | 标题与代码字体：LXGW Neo XiHei 的等宽版（合并 M+ 1M），自托管子集 |
+| LXGW WenKai Screen | 正文、导航、元信息、标签与页脚字体，自托管子集 |
 
 ## 环境要求
 
@@ -123,24 +124,28 @@ draft: false
 ### 配色与字体
 
 - 主色只有一行：`src/styles/global.css` 里的 `--color-accent`。
-- 全站统一使用 **NeoXiHei Code**（霞鹜新晰黑 Code）：
-  LXGW Neo XiHei 的等宽版，合并 M+ 1M 用于编程显示，
-  因此中文、英文、数字与代码都使用同一个字体。
-  来源：<https://github.com/lxgw/NeoXiHei-Code>，版本 v1.305。
-  字体文件在 `public/fonts/neoxihei-code-1.305.woff2`。
-- 字体是 ASCII + Latin-1 + GB2312 一级字（3,755 个常用字）+ 当前站点用字 +
-  常用标点的 WOFF2 子集，约 440 KiB。新增生僻字如果不在子集内，会回退到系统
-  等宽字体；重新生成子集：
+- **标题 / 品牌 / 代码**使用 **NeoXiHei Code**（霞鹜新晰黑 Code），
+  即 LXGW Neo XiHei 的等宽版（合并 M+ 1M）。标题里的英文单词
+  （例如 `neovim`）也使用它。来源：<https://github.com/lxgw/NeoXiHei-Code>，
+  版本 v1.305，文件在 `public/fonts/neoxihei-code-1.305.woff2`。
+- **正文 / 导航 / 元信息 / 标签 / 页脚**使用 **LXGW WenKai Screen**
+  （霞鹜文楷 屏幕阅读版）。来源：<https://github.com/lxgw/LxgwWenKai-Screen>，
+  版本 v1.522，文件在 `public/fonts/lxgw-wenkai-screen-1.522.woff2`。
+- 桌面端正文宽度由 `--prose-width` 控制，当前为 `80ch`（主题默认 `68ch`），
+  在 1440px 视口下正文约 760px 宽。
+- 两个字体都是 ASCII + Latin-1 + GB2312 一级字（3,755 个常用字）+
+  当前站点用字 + 常用标点的 WOFF2 子集。新增生僻字如果不在子集内，会回退到
+  系统字体；重新生成：
 
   ```bash
   python3 -m pip install fonttools brotli
   python3 scripts/subset-neoxihei-font.py
+  python3 scripts/subset-wenkai-font.py
   ```
 
-  脚本会把 v1.305 的完整 TTF 下载到 `.cache/`（已忽略），同时生成浏览器用的
-  `public/fonts/neoxihei-code-1.305.woff2` 和 OG 图片用的
-  `src/assets/fonts/neoxihei-code-og.woff`。
-- OG 图片也使用同一个字体，不再依赖 `@fontsource`。
+  脚本会把完整 TTF 下载到 `.cache/`（已忽略），同时生成浏览器用的 WOFF2
+  和 OG 图片用的 `src/assets/fonts/*-og.woff`。
+- OG 图片中标题用 NeoXiHei Code，摘要用 LXGW WenKai Screen。
 
 ### 搜索
 
@@ -214,8 +219,10 @@ Pagefind 索引只在 `npm run build` 之后存在，`npm run dev` 中不可用�
 用 `npm run preview` 验证。
 
 **OG 图片中文变成方框**
-说明 `src/assets/fonts/neoxihei-code-og.woff` 缺失或损坏。运行
-`python3 scripts/subset-neoxihei-font.py` 重新生成字体子集。
+说明 `src/assets/fonts/neoxihei-code-og.woff` 或
+`src/assets/fonts/lxgw-wenkai-screen-og.woff` 缺失/损坏。运行
+`python3 scripts/subset-neoxihei-font.py` 与
+`python3 scripts/subset-wenkai-font.py` 重新生成字体子集。
 
 ## 共享仓库的权限注意事项
 
@@ -232,5 +239,7 @@ Pagefind 索引只在 `npm run build` 之后存在，`npm run dev` 中不可用�
 - 主题与代码：**MIT**，见 [LICENSE](./LICENSE) 与
   [Astro Keel](https://github.com/kpab/astro-keel)。
 - 字体 **NeoXiHei Code** 遵循 **IPA Font License 1.0**，
-  见 [public/fonts/NeoXiHei-Code-License.txt](public/fonts/NeoXiHei-Code-License.txt)；
-  子集化仅用于网页与 OG 图片字体分发。
+  见 [public/fonts/NeoXiHei-Code-License.txt](public/fonts/NeoXiHei-Code-License.txt)。
+- 字体 **LXGW WenKai Screen** 遵循 **SIL Open Font License 1.1**，
+  见 [public/fonts/OFL-LXGW-WenKai.txt](public/fonts/OFL-LXGW-WenKai.txt)。
+- 两个字体的子集化仅用于网页与 OG 图片字体分发。

@@ -1,10 +1,21 @@
 /* NeoXiHei Code (新晰黑 Code) — the monospaced cut of LXGW Neo XiHei,
-   merged with M+ 1M for programming. All site text uses this face.
-   Licensed under the IPA Font License 1.0; see
-   /fonts/NeoXiHei-Code-License.txt and https://github.com/lxgw/NeoXiHei-Code. */
+   merged with M+ 1M for programming. Used for headings and code, including
+   Latin words such as “neovim”. Licensed under the IPA Font License 1.0;
+   see /fonts/NeoXiHei-Code-License.txt and https://github.com/lxgw/NeoXiHei-Code. */
 @font-face {
   font-family: 'NeoXiHei Code';
   src: url('/fonts/neoxihei-code-1.305.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* LXGW WenKai Screen (霞鹜文楷 屏幕阅读版) — body, navigation, metadata,
+   tags, and the footer. Licensed under the SIL OFL 1.1; see
+   /fonts/OFL-LXGW-WenKai.txt and https://github.com/lxgw/LxgwWenKai-Screen. */
+@font-face {
+  font-family: 'LXGW WenKai Screen';
+  src: url('/fonts/lxgw-wenkai-screen-1.522.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -25,12 +36,13 @@
   --color-line: oklch(0.86 0.008 100);
   --color-line-strong: oklch(0.72 0.012 120);
   --color-soft: oklch(0.94 0.006 100);
-  /* One monospaced family for Chinese, English, and code. */
-  --font-display: 'NeoXiHei Code', ui-monospace, monospace;
-  --font-body: 'NeoXiHei Code', ui-monospace, monospace;
-  --font-mono: 'NeoXiHei Code', ui-monospace, monospace;
+  /* Headings/code use XinHei Mono; body and chrome use WenKai. */
+  --font-display: 'NeoXiHei Code', 'LXGW WenKai Screen', ui-monospace, monospace;
+  --font-body: 'LXGW WenKai Screen', 'NeoXiHei Code', sans-serif;
+  --font-mono: 'NeoXiHei Code', 'LXGW WenKai Screen', ui-monospace, monospace;
   --content-width: 1160px;
-  --prose-width: 68ch;
+  /* Wider than the theme default for comfortable Chinese reading on desktop. */
+  --prose-width: 80ch;
   --page-pad: clamp(1rem, 3vw, 2rem);
   --card-pad: clamp(1.5rem, 3vw, 2.25rem);
   --baseline: 1.5rem;
@@ -359,10 +371,13 @@ p {
 }
 
 .lead {
-  max-width: var(--prose-width);
+  /* The lead is a short standfirst; keep it a little narrower than prose and
+     balance its lines so it never leaves a one-word orphan. */
+  max-width: 72ch;
   color: var(--color-muted);
   font-size: clamp(1.1rem, 1.6vw, 1.28rem);
   line-height: 1.85;
+  text-wrap: balance;
 }
 
 .action-row {

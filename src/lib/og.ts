@@ -7,9 +7,9 @@ import { SITE } from '../consts';
 /**
  * Build-time Open Graph images, rendered in the theme's light palette.
  *
- * The site uses a single typeface — NeoXiHei Code — so share cards use the same
- * font. The WOFF lives in `src/assets` (not `public`) because satori only needs
- * it while rendering and it should not be served to browsers.
+ * Headings use NeoXiHei Code (XinHei Mono) and the summary uses LXGW WenKai
+ * Screen, matching the site's display/body pairing. Both WOFFs live in
+ * `src/assets` because satori only needs them while rendering.
  */
 
 export interface OgImageProps {
@@ -28,9 +28,10 @@ const COLOR = {
   accent: '#a8492c',
 };
 
-const font = await readFile(
-  join(process.cwd(), 'src/assets/fonts/neoxihei-code-og.woff'),
-);
+const [displayFont, bodyFont] = await Promise.all([
+  readFile(join(process.cwd(), 'src/assets/fonts/neoxihei-code-og.woff')),
+  readFile(join(process.cwd(), 'src/assets/fonts/lxgw-wenkai-screen-og.woff')),
+]);
 
 const truncate = (text: string, max: number) =>
   text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
@@ -148,7 +149,7 @@ export async function renderOgImage({ title, description, kind }: OgImageProps) 
                 type: 'div',
                 props: {
                   style: {
-                    fontFamily: 'NeoXiHei Code',
+                    fontFamily: 'LXGW WenKai Screen',
                     fontSize: 24,
                     lineHeight: 1.5,
                     color: COLOR.muted,
@@ -164,7 +165,10 @@ export async function renderOgImage({ title, description, kind }: OgImageProps) 
     {
       width: 1200,
       height: 630,
-      fonts: [{ name: 'NeoXiHei Code', data: font, weight: 400, style: 'normal' }],
+      fonts: [
+        { name: 'NeoXiHei Code', data: displayFont, weight: 400, style: 'normal' },
+        { name: 'LXGW WenKai Screen', data: bodyFont, weight: 400, style: 'normal' },
+      ],
     },
   );
 
