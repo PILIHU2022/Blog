@@ -1,23 +1,10 @@
-/* Chinese webfont — LXGW WenKai Mono Screen (霞鹜文楷等宽 屏幕阅读版).
-   Subset to GB2312 level-1 + every character used on the site; Latin still
-   renders in the English faces below. Licensed under the SIL OFL 1.1, see
-   /fonts/OFL-LXGW-WenKai.txt and https://github.com/lxgw/LxgwWenKai-Screen. */
+/* NeoXiHei Code (新晰黑 Code) — the monospaced cut of LXGW Neo XiHei,
+   merged with M+ 1M for programming. All site text uses this face.
+   Licensed under the IPA Font License 1.0; see
+   /fonts/NeoXiHei-Code-License.txt and https://github.com/lxgw/NeoXiHei-Code. */
 @font-face {
-  font-family: 'LXGW WenKai Mono Screen';
-  src: url('/fonts/lxgw-wenkai-mono-screen-1.522.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  /* CJK glyphs fill more of the em box than Public Sans, so mixed
-     Chinese/English lines looked uneven at 100%. 92% balances the two. */
-  size-adjust: 92%;
-}
-
-/* Code keeps CJK at full size so Chinese comments line up with Cascadia Code's
-   monospaced Latin glyphs. */
-@font-face {
-  font-family: 'LXGW WenKai Mono Screen Code';
-  src: url('/fonts/lxgw-wenkai-mono-screen-1.522.woff2') format('woff2');
+  font-family: 'NeoXiHei Code';
+  src: url('/fonts/neoxihei-code-1.305.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -38,13 +25,10 @@
   --color-line: oklch(0.86 0.008 100);
   --color-line-strong: oklch(0.72 0.012 120);
   --color-soft: oklch(0.94 0.006 100);
-  /* Latin faces stay first; CJK glyphs fall through to LXGW WenKai Mono. */
-  --font-display: 'Fraunces Variable', 'LXGW WenKai Mono Screen', 'Noto Serif SC',
-    'Noto Serif CJK SC', 'Source Han Serif SC', 'Source Han Serif CN', 'Songti SC', Georgia, serif;
-  --font-body: 'Public Sans', 'LXGW WenKai Mono Screen', 'Noto Sans SC', 'Noto Sans CJK SC',
-    'Source Han Sans SC', 'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', system-ui,
-    sans-serif;
-  --font-mono: 'Cascadia Code Variable', 'LXGW WenKai Mono Screen Code', ui-monospace, monospace;
+  /* One monospaced family for Chinese, English, and code. */
+  --font-display: 'NeoXiHei Code', ui-monospace, monospace;
+  --font-body: 'NeoXiHei Code', ui-monospace, monospace;
+  --font-mono: 'NeoXiHei Code', ui-monospace, monospace;
   --content-width: 1160px;
   --prose-width: 68ch;
   --page-pad: clamp(1rem, 3vw, 2rem);
@@ -253,16 +237,6 @@ a:not(.brand, .button):hover {
   position: relative;
 }
 
-.hero::before {
-  content: '';
-  position: absolute;
-  top: clamp(1.5rem, 3vw, 2.5rem);
-  left: 0;
-  width: 1px;
-  height: clamp(2.5rem, 5vw, 4rem);
-  background: var(--color-accent);
-}
-
 .hero > * {
   animation: keel-enter 560ms ease both;
 }
@@ -351,7 +325,7 @@ p {
 h1,
 h2,
 h3 {
-  max-width: 18ch;
+  max-width: 30ch;
   font-family: var(--font-display);
   font-variation-settings:
     'opsz' 72,
@@ -614,7 +588,7 @@ pre code {
 
 .entry-card h2,
 .work-card h2 {
-  max-width: 24ch;
+  max-width: 34ch;
   font-size: clamp(1.6rem, 3vw, 2.75rem);
   line-height: 1.2;
 }
@@ -935,7 +909,7 @@ pre code {
 
 .highlight-card h3,
 .note-row h3 {
-  max-width: 24ch;
+  max-width: 32ch;
 }
 
 .highlight-card p,
@@ -1130,10 +1104,6 @@ pre code {
     grid-row: 2;
     justify-content: flex-start;
     overflow-x: auto;
-  }
-
-  .hero::before {
-    height: 3rem;
   }
 
   .split-overview,

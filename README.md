@@ -15,9 +15,7 @@
 | [Pagefind](https://pagefind.app/) | 构建时生成的纯静态全文搜索，无后端 |
 | Shiki | 代码高亮，浅色/深色双主题 |
 | satori + sharp | 构建时为每篇文章生成 1200×630 的 OG 图片 |
-| LXGW WenKai Mono Screen | 中文正文与标题字体，自托管 WOFF2 子集 |
-| Cascadia Code | 代码与等宽数字字体 |
-| Noto Serif SC | OG 图片中的中文显示（字体随 `@fontsource` 安装） |
+| NeoXiHei Code | 全站唯一字体：LXGW Neo XiHei 的等宽版（合并 M+ 1M），自托管子集 |
 
 ## 环境要求
 
@@ -125,28 +123,24 @@ draft: false
 ### 配色与字体
 
 - 主色只有一行：`src/styles/global.css` 里的 `--color-accent`。
-- 英文、数字与代码使用自托管字体：
-  Fraunces（标题）、Public Sans（正文）、Cascadia Code（代码）。
-- 中文使用 **LXGW WenKai Mono Screen**（霞鹜文楷等宽屏幕阅读版），
-  字体文件在 `public/fonts/lxgw-wenkai-mono-screen-1.522.woff2`。
-  来源：<https://github.com/lxgw/LxgwWenKai-Screen>，版本 v1.522。
-  字体栈里它排在英文字体之后，所以英文仍走默认字体，只有 CJK 字符会回退到文楷。
-- 中文正文通过 `size-adjust: 92%` 微调，使中英混排时的视觉大小更接近；
-  代码块里另有一个 100% 的 `LXGW WenKai Mono Screen Code` 字面，
-  避免中文注释比 Cascadia Code 小一圈。
-- 中文字体是 GB2312 一级字（3,755 个常用字）+ 当前站点用字 + 常用标点的
-  WOFF2 子集，约 993 KiB。如果新增文章用到子集外的生僻字，会回退到系统
-  CJK 字体；重新生成子集：
+- 全站统一使用 **NeoXiHei Code**（霞鹜新晰黑 Code）：
+  LXGW Neo XiHei 的等宽版，合并 M+ 1M 用于编程显示，
+  因此中文、英文、数字与代码都使用同一个字体。
+  来源：<https://github.com/lxgw/NeoXiHei-Code>，版本 v1.305。
+  字体文件在 `public/fonts/neoxihei-code-1.305.woff2`。
+- 字体是 ASCII + Latin-1 + GB2312 一级字（3,755 个常用字）+ 当前站点用字 +
+  常用标点的 WOFF2 子集，约 440 KiB。新增生僻字如果不在子集内，会回退到系统
+  等宽字体；重新生成子集：
 
   ```bash
   python3 -m pip install fonttools brotli
-  python3 scripts/subset-lxgw-font.py
+  python3 scripts/subset-neoxihei-font.py
   ```
 
-  脚本会把 v1.522 的完整 TTF 下载到 `.cache/`（已忽略），再生成
-  `public/fonts/lxgw-wenkai-mono-screen-1.522.woff2`。
-- OG 图片仍在构建时使用 `@fontsource/noto-serif-sc` 的宋体子集，
-  与正文的手写体相互独立。
+  脚本会把 v1.305 的完整 TTF 下载到 `.cache/`（已忽略），同时生成浏览器用的
+  `public/fonts/neoxihei-code-1.305.woff2` 和 OG 图片用的
+  `src/assets/fonts/neoxihei-code-og.woff`。
+- OG 图片也使用同一个字体，不再依赖 `@fontsource`。
 
 ### 搜索
 
@@ -220,8 +214,8 @@ Pagefind 索引只在 `npm run build` 之后存在，`npm run dev` 中不可用�
 用 `npm run preview` 验证。
 
 **OG 图片中文变成方框**
-说明 `@fontsource/noto-serif-sc` 没有安装或字体路径被改坏。运行
-`npm install` 后重新构建。
+说明 `src/assets/fonts/neoxihei-code-og.woff` 缺失或损坏。运行
+`python3 scripts/subset-neoxihei-font.py` 重新生成字体子集。
 
 ## 共享仓库的权限注意事项
 
@@ -237,7 +231,6 @@ Pagefind 索引只在 `npm run build` 之后存在，`npm run dev` 中不可用�
 - 站点文章：**CC BY-NC-SA 4.0**（除非文章内另有说明）。
 - 主题与代码：**MIT**，见 [LICENSE](./LICENSE) 与
   [Astro Keel](https://github.com/kpab/astro-keel)。
-- 中文字体 LXGW WenKai Mono Screen 遵循 **SIL Open Font License 1.1**，
-  见 [public/fonts/OFL-LXGW-WenKai.txt](public/fonts/OFL-LXGW-WenKai.txt)；
-  子集化仅用于网页字体分发。
-- OG 图片使用 Noto Serif CJK SC 的子集，字体遵循 SIL Open Font License 1.1。
+- 字体 **NeoXiHei Code** 遵循 **IPA Font License 1.0**，
+  见 [public/fonts/NeoXiHei-Code-License.txt](public/fonts/NeoXiHei-Code-License.txt)；
+  子集化仅用于网页与 OG 图片字体分发。

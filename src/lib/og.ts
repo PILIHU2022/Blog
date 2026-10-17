@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
+import { join } from 'node:path';
 import satori from 'satori';
 import sharp from 'sharp';
 import { SITE } from '../consts';
@@ -7,11 +7,9 @@ import { SITE } from '../consts';
 /**
  * Build-time Open Graph images, rendered in the theme's light palette.
  *
- * Latin display type comes from Fraunces; Chinese titles and summaries use
- * Noto Serif SC. Both are loaded from `@fontsource` packages so the build does
- * not depend on fonts installed on the host (Vercel's builder has none).
- * The Chinese font file is the package's full `chinese-simplified` subset,
- * which covers the posts and any future ones using common simplified glyphs.
+ * The site uses a single typeface — NeoXiHei Code — so share cards use the same
+ * font. The WOFF lives in `src/assets` (not `public`) because satori only needs
+ * it while rendering and it should not be served to browsers.
  */
 
 export interface OgImageProps {
@@ -30,20 +28,20 @@ const COLOR = {
   accent: '#a8492c',
 };
 
-const require = createRequire(import.meta.url);
-const font = (pkgPath: string) => readFile(require.resolve(pkgPath));
-
-const [fraunces, publicSans, cjkRegular, cjkSemibold] = await Promise.all([
-  font('@fontsource/fraunces/files/fraunces-latin-600-normal.woff'),
-  font('@fontsource/public-sans/files/public-sans-latin-400-normal.woff'),
-  font('@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-400-normal.woff'),
-  font('@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-600-normal.woff'),
-]);
+const font = await readFile(
+  join(process.cwd(), 'src/assets/fonts/neoxihei-code-og.woff'),
+);
 
 const truncate = (text: string, max: number) =>
   text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
 
 export async function renderOgImage({ title, description, kind }: OgImageProps) {
+  // The card's inner text width is ~998px. NeoXiHei Code is monospaced, so a
+  // CJK character is one em and a Latin character roughly half an em.
+  const titleSize = title.length > 24 ? 32 : title.length > 19 ? 40 : title.length > 14 ? 52 : 64;
+  const titleText = truncate(title, 30);
+  const descriptionText = truncate(description, 38);
+
   const svg = await satori(
     {
       type: 'div',
@@ -54,7 +52,7 @@ export async function renderOgImage({ title, description, kind }: OgImageProps) 
           display: 'flex',
           backgroundColor: COLOR.bg,
           padding: 40,
-          fontFamily: 'Public Sans',
+          fontFamily: 'NeoXiHei Code',
         },
         children: {
           type: 'div',
@@ -87,7 +85,7 @@ export async function renderOgImage({ title, description, kind }: OgImageProps) 
                       type: 'div',
                       props: {
                         style: {
-                          fontFamily: 'Fraunces',
+                          fontFamily: 'NeoXiHei Code',
                           fontSize: 30,
                           color: COLOR.text,
                         },
@@ -111,7 +109,7 @@ export async function renderOgImage({ title, description, kind }: OgImageProps) 
                           gap: 14,
                           marginBottom: 28,
                           color: COLOR.accent,
-                          fontFamily: 'Fraunces',
+                          fontFamily: 'NeoXiHei Code',
                           fontSize: 24,
                           textTransform: 'uppercase',
                           letterSpacing: 4,
@@ -135,13 +133,12 @@ export async function renderOgImage({ title, description, kind }: OgImageProps) 
                       type: 'div',
                       props: {
                         style: {
-                          fontFamily: 'Noto Serif SC',
-                          fontWeight: 600,
-                          fontSize: title.length > 30 ? 52 : 64,
-                          lineHeight: 1.25,
+                          fontFamily: 'NeoXiHei Code',
+                          fontSize: titleSize,
+                          lineHeight: 1.3,
                           color: COLOR.text,
                         },
-                        children: truncate(title, 42),
+                        children: titleText,
                       },
                     },
                   ],
@@ -151,13 +148,12 @@ export async function renderOgImage({ title, description, kind }: OgImageProps) 
                 type: 'div',
                 props: {
                   style: {
-                    fontFamily: 'Noto Serif SC',
-                    fontWeight: 400,
-                    fontSize: 26,
+                    fontFamily: 'NeoXiHei Code',
+                    fontSize: 24,
                     lineHeight: 1.5,
                     color: COLOR.muted,
                   },
-                  children: truncate(description, 70),
+                  children: descriptionText,
                 },
               },
             ],
@@ -168,12 +164,7 @@ export async function renderOgImage({ title, description, kind }: OgImageProps) 
     {
       width: 1200,
       height: 630,
-      fonts: [
-        { name: 'Fraunces', data: fraunces, weight: 600, style: 'normal' },
-        { name: 'Public Sans', data: publicSans, weight: 400, style: 'normal' },
-        { name: 'Noto Serif SC', data: cjkRegular, weight: 400, style: 'normal' },
-        { name: 'Noto Serif SC', data: cjkSemibold, weight: 600, style: 'normal' },
-      ],
+      fonts: [{ name: 'NeoXiHei Code', data: font, weight: 400, style: 'normal' }],
     },
   );
 
