@@ -24,11 +24,18 @@
     { "source": "/tags/arch", "destination": "/blog/tags/arch-linux", "permanent": true },
     { "source": "/tags/arch/", "destination": "/blog/tags/arch-linux", "permanent": true },
     { "source": "/categories/arch-linux", "destination": "/blog/tags/arch-linux", "permanent": true },
+    { "source": "/categories/arch-linux/", "destination": "/blog/tags/arch-linux", "permanent": true },
     { "source": "/categories/guide", "destination": "/blog/tags/guides", "permanent": true },
+    { "source": "/categories/guide/", "destination": "/blog/tags/guides", "permanent": true },
     { "source": "/categories/blog", "destination": "/blog/tags/blog", "permanent": true },
-    { "source": "/categories/:category*", "destination": "/blog/", "permanent": true },
-    { "source": "/tags/:tag*", "destination": "/blog/tags/:tag*", "permanent": true },
-    { "source": "/authors/:author*", "destination": "/about/", "permanent": true },
-    { "source": "/posts/:slug*", "destination": "/blog/:slug*", "permanent": true }
+    { "source": "/categories/blog/", "destination": "/blog/tags/blog", "permanent": true },
+    { "source": "/categories/:category(.*)", "destination": "/blog/", "permanent": true },
+    { "source": "/tags/:tag(.*)", "destination": "/blog/tags/:tag", "permanent": true },
+    { "source": "/authors", "destination": "/about/", "permanent": true },
+    { "source": "/authors/", "destination": "/about/", "permanent": true },
+    { "source": "/authors/:author(.*)", "destination": "/about/", "permanent": true },
+    { "source": "/posts", "destination": "/blog/", "permanent": true },
+    { "source": "/posts/", "destination": "/blog/", "permanent": true },
+    { "source": "/posts/:slug(.*)", "destination": "/blog/:slug", "permanent": true }
   ]
 }
