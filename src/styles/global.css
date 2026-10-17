@@ -8,6 +8,19 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  /* CJK glyphs fill more of the em box than Public Sans, so mixed
+     Chinese/English lines looked uneven at 100%. 92% balances the two. */
+  size-adjust: 92%;
+}
+
+/* Code keeps CJK at full size so Chinese comments line up with Cascadia Code's
+   monospaced Latin glyphs. */
+@font-face {
+  font-family: 'LXGW WenKai Mono Screen Code';
+  src: url('/fonts/lxgw-wenkai-mono-screen-1.522.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 :root {
@@ -31,7 +44,7 @@
   --font-body: 'Public Sans', 'LXGW WenKai Mono Screen', 'Noto Sans SC', 'Noto Sans CJK SC',
     'Source Han Sans SC', 'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', system-ui,
     sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'LXGW WenKai Mono Screen', ui-monospace, monospace;
+  --font-mono: 'Cascadia Code Variable', 'LXGW WenKai Mono Screen Code', ui-monospace, monospace;
   --content-width: 1160px;
   --prose-width: 68ch;
   --page-pad: clamp(1rem, 3vw, 2rem);

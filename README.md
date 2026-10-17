@@ -16,6 +16,7 @@
 | Shiki | 代码高亮，浅色/深色双主题 |
 | satori + sharp | 构建时为每篇文章生成 1200×630 的 OG 图片 |
 | LXGW WenKai Mono Screen | 中文正文与标题字体，自托管 WOFF2 子集 |
+| Cascadia Code | 代码与等宽数字字体 |
 | Noto Serif SC | OG 图片中的中文显示（字体随 `@fontsource` 安装） |
 
 ## 环境要求
@@ -124,12 +125,15 @@ draft: false
 ### 配色与字体
 
 - 主色只有一行：`src/styles/global.css` 里的 `--color-accent`。
-- 英文、数字与代码继续使用主题默认的自托管字体：
-  Fraunces（标题）、Public Sans（正文）、JetBrains Mono（代码）。
+- 英文、数字与代码使用自托管字体：
+  Fraunces（标题）、Public Sans（正文）、Cascadia Code（代码）。
 - 中文使用 **LXGW WenKai Mono Screen**（霞鹜文楷等宽屏幕阅读版），
   字体文件在 `public/fonts/lxgw-wenkai-mono-screen-1.522.woff2`。
   来源：<https://github.com/lxgw/LxgwWenKai-Screen>，版本 v1.522。
   字体栈里它排在英文字体之后，所以英文仍走默认字体，只有 CJK 字符会回退到文楷。
+- 中文正文通过 `size-adjust: 92%` 微调，使中英混排时的视觉大小更接近；
+  代码块里另有一个 100% 的 `LXGW WenKai Mono Screen Code` 字面，
+  避免中文注释比 Cascadia Code 小一圈。
 - 中文字体是 GB2312 一级字（3,755 个常用字）+ 当前站点用字 + 常用标点的
   WOFF2 子集，约 993 KiB。如果新增文章用到子集外的生僻字，会回退到系统
   CJK 字体；重新生成子集：
