@@ -538,7 +538,10 @@ pre code {
 }
 
 .article-layout.no-toc .prose {
+  /* Article body is a touch larger than chrome text; because `--prose-width`
+     is in `ch`, this also widens the reading column at the same time. */
   max-width: var(--prose-width);
+  font-size: 1.125rem;
 }
 
 .index-sidebar,
@@ -788,7 +791,10 @@ pre code {
 }
 
 .prose {
+  /* Article body is a touch larger than chrome text; because `--prose-width`
+     is in `ch`, this also widens the reading column at the same time. */
   max-width: var(--prose-width);
+  font-size: 1.125rem;
 }
 
 .prose h2,

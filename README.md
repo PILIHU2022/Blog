@@ -131,8 +131,8 @@ draft: false
 - **正文 / 导航 / 元信息 / 标签 / 页脚**使用 **LXGW WenKai Screen**
   （霞鹜文楷 屏幕阅读版）。来源：<https://github.com/lxgw/LxgwWenKai-Screen>，
   版本 v1.522，文件在 `public/fonts/lxgw-wenkai-screen-1.522.woff2`。
-- 桌面端正文宽度由 `--prose-width` 控制，当前为 `80ch`（主题默认 `68ch`），
-  在 1440px 视口下正文约 760px 宽。
+- 桌面端正文：`.prose` 字号为 `18px`，宽度由 `--prose-width: 80ch` 控制；
+  1440px 视口下正文约 **837px** 宽（主题默认 16px / 68ch 时约 646px）。
 - 两个字体都是 ASCII + Latin-1 + GB2312 一级字（3,755 个常用字）+
   当前站点用字 + 常用标点的 WOFF2 子集。新增生僻字如果不在子集内，会回退到
   系统字体；重新生成：
