@@ -1071,6 +1071,113 @@ pre code {
   border-top: var(--hairline);
 }
 
+/* Friends: avatar cards sit on the same hairline grid as the rest of the theme. */
+.friend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 1px;
+  border: var(--hairline);
+  background: var(--color-line);
+}
+
+/* `background-image: none` cancels the underline gradient the theme adds to
+   every non-button link, which would otherwise draw a 1px line across the card. */
+.friend-grid .friend-card {
+  display: grid;
+  grid-template-areas:
+    'avatar name'
+    'avatar host';
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: center;
+  gap: 0.1rem 1.1rem;
+  min-height: 8.5rem;
+  padding: var(--card-pad);
+  background-color: var(--color-bg);
+  background-image: none;
+  transition: background-color 180ms ease;
+}
+
+.friend-grid .friend-card:hover {
+  background-color: var(--color-surface);
+}
+
+.friend-avatar {
+  width: 3.75rem;
+  height: 3.75rem;
+  border: var(--hairline);
+  border-radius: 50%;
+  background: var(--color-soft);
+  object-fit: cover;
+}
+
+.friend-card .friend-avatar {
+  grid-area: avatar;
+  align-self: center;
+}
+
+.friend-name {
+  grid-area: name;
+  align-self: end;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.friend-host {
+  grid-area: host;
+  align-self: start;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.friend-exchange {
+  border-top: var(--hairline);
+}
+
+.friend-self {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+  padding: var(--card-pad);
+  border: var(--hairline);
+  background: var(--color-surface);
+}
+
+.friend-self .friend-avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.friend-facts {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.friend-facts > div {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.friend-facts dt {
+  padding-top: 0.15rem;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.friend-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .site-footer {
   /* A real three-column grid keeps the middle links centered regardless of
      how wide the copyright and social groups are. */
@@ -1169,7 +1276,8 @@ pre code {
   .about-ledger,
   .content-index,
   .article-layout,
-  .work-card {
+  .work-card,
+  .friend-self {
     grid-template-columns: 1fr;
   }
 

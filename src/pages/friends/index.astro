@@ -1,0 +1,125 @@
+---
+// Friend links live in `src/data/friends.ts`; this page is the presentation.
+// The exchange instructions are page copy, so they stay here rather than in
+// `src/i18n/` (same convention as /about/).
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withBase } from '../../lib/url';
+import { SITE } from '../../consts';
+import { FRIENDS } from '../../data/friends';
+import { t } from '../../i18n';
+
+const siteUrl = new URL(withBase('/'), Astro.site ?? new URL(Astro.url.origin));
+const absolute = (path: string) => new URL(withBase(path), siteUrl).href;
+const avatarSrc = (avatar: string) => (avatar.startsWith('/') ? withBase(avatar) : avatar);
+const hostOf = (url: string) => new URL(url).host.replace(/^www\./, '');
+
+interface InfoRow {
+  label: string;
+  value: string;
+  href?: string;
+}
+
+const siteInfo: InfoRow[] = [
+  { label: '昵称', value: 'Spark' },
+  { label: '站点', value: siteUrl.host, href: siteUrl.href },
+  {
+    label: '头像',
+    value: absolute('/images/avatar.webp'),
+    href: absolute('/images/avatar.webp'),
+  },
+  { label: '描述', value: SITE.description },
+];
+
+// Placeholder-only sample: people copy this into an email or an issue.
+const submitSnippet = `- nickname: <你的昵称>
+  avatar: <头像地址>
+  url: <你的站点>
+  description: <一句话描述>`;
+---
+
+<BaseLayout
+  title={t('nav.friends')}
+  description={`Spark 常逛的个人博客，以及友链交换说明 — ${SITE.title}。`}
+>
+  <section class="page-head section">
+    <p class="eyebrow">友链</p>
+    <h1>一些同路人的博客。</h1>
+    <p class="lead">
+      这里放几个我常去逛的个人站点。数量不多，但都是我真正会点开看的——如果哪天打不开了，也会从列表里撤下来。
+    </p>
+  </section>
+
+  <section class="section" aria-labelledby="friend-list">
+    <div class="section-heading">
+      <p class="eyebrow">列表</p>
+      <h2 id="friend-list">常去的地方。</h2>
+    </div>
+
+    <div class="friend-grid">
+      {
+        FRIENDS.map((friend) => (
+          <a class="friend-card" href={friend.url} target="_blank" rel="noopener noreferrer">
+            <img
+              class="friend-avatar"
+              src={avatarSrc(friend.avatar)}
+              alt=""
+              width="64"
+              height="64"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="friend-name">{friend.name}</span>
+            <span class="friend-host">{hostOf(friend.url)} ↗</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section prose-grid friend-exchange" aria-labelledby="friend-exchange">
+    <div>
+      <p class="eyebrow">交换</p>
+      <h2 id="friend-exchange">想换友链的话。</h2>
+      <p class="lead">这个站没有评论系统，交换请直接发邮件。</p>
+    </div>
+
+    <div class="prose-stack">
+      <div class="friend-self">
+        <img
+          class="friend-avatar"
+          src={avatarSrc('/images/avatar.webp')}
+          alt="Spark 的头像"
+          width="72"
+          height="72"
+          loading="lazy"
+          decoding="async"
+        />
+        <dl class="friend-facts">
+          {
+            siteInfo.map((row) => (
+              <div>
+                <dt>{row.label}</dt>
+                <dd>{row.href ? <a href={row.href}>{row.value}</a> : row.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <p>
+        按下面的格式把信息发到 <a href="mailto:Spark-CN@outlook.com">Spark-CN@outlook.com</a
+        >，或者到{' '}
+        <a href="https://github.com/PILIHU2022/Blog">GitHub</a> 开一个 issue：
+      </p>
+
+      <pre><code>{submitSnippet}</code></pre>
+
+      <h3>几点说明</h3>
+      <ol>
+        <li>只接受个人、非商业的博客或站点。</li>
+        <li>站点失效、长期停更或内容不当，可能会被移出列表。</li>
+        <li>不尊重他人劳动成果、无来源转载或有恶意行为的站点，不交换。</li>
+      </ol>
+    </div>
+  </section>
+</BaseLayout>

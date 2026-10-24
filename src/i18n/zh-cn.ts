@@ -13,6 +13,7 @@ export const zhCN: UIStrings = {
   // Header, footer, and other chrome
   'nav.home': '首页',
   'nav.about': '关于',
+  'nav.friends': '友链',
   'nav.works': '作品',
   'nav.blog': '文章',
   'nav.search': '搜索',

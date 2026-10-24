@@ -9,6 +9,7 @@ export const ja: UIStrings = {
   // Header, footer, and other chrome
   'nav.home': 'ホーム',
   'nav.about': 'プロフィール',
+  'nav.friends': 'リンク',
   'nav.works': '制作物',
   'nav.blog': 'ブログ',
   'nav.search': '検索',

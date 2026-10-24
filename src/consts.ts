@@ -102,5 +102,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/', labelKey: 'nav.home' },
   { href: '/blog/', labelKey: 'nav.blog' },
   { href: '/about/', labelKey: 'nav.about' },
+  { href: '/friends/', labelKey: 'nav.friends' },
   { href: '/search/', labelKey: 'nav.search' },
 ];
