@@ -1,72 +1,143 @@
 ---
-// The prose on this page is site copy, not UI chrome, so it intentionally lives
-// here rather than in `src/i18n/`.
+// Spark's own "about" copy, ported from the old Hugo site. The text is kept as
+// written; only the "This site" bullets were updated to the current stack.
+//
+// Inline links are separated with explicit `{' '}`: Astro trims whitespace at
+// line boundaries, so plain newlines around <a> would collapse the spaces.
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withBase } from '../../lib/url';
 import { SITE } from '../../consts';
 import { t } from '../../i18n';
 ---
 
-<BaseLayout title={t('about.title')} description={`关于 Spark，以及这个博客 — ${SITE.title}。`}>
+<BaseLayout
+  title={t('about.title')}
+  description={`关于 Spark：自我介绍、兴趣、常用工具与联系方式 — ${SITE.title}。`}
+>
   <section class="page-head section">
-    <p class="eyebrow">{t('about.eyebrow')}</p>
-    <h1>写代码，也记录折腾的过程。</h1>
-    <p class="lead">
-      我是 Spark。这个博客从 2022 年开始记录我在 Linux、开发工具和自建服务上的实践，
-      以及那些最后被写进笔记里的坑。
-    </p>
+    <p class="eyebrow">关于</p>
+    <h1>Hi 👋</h1>
+    <p class="lead">Let me tell you something about me!</p>
   </section>
 
   <section class="section prose-grid">
     <div>
-      <p class="eyebrow">简介</p>
-      <h2>把复杂的步骤，写成能照着做的笔记。</h2>
+      <p class="eyebrow">Intro</p>
+      <h2>I'm Spark.</h2>
     </div>
-    <div class="prose-stack">
+    <div class="prose">
       <p>
-        平时主要使用 Arch Linux，桌面环境折腾过 Hyprland，编辑器是 Neovim。
-        博客里的文章多半来自实际使用：安装系统、配置显卡驱动、调整中文字体、
-        给编辑器接上格式化工具，或者把某个服务部署到 Cloudflare 和 Vercel。
+        I'm Spark, a senior hight school student who is learning coding with C-lang and Python.{' '}
+        <del>Who want to enter SYSU in the future</del>
       </p>
       <p>
-        写下来的原因很简单——同样的步骤下次还会用到，而互联网上的教程往往过期得很快。
-        这里的文章会尽量写清楚前提、命令和结果，方便未来的自己，也方便刚好路过的你。
+        My code is pushed to GitHub:{' '}
+        <a href="https://github.com/PILIHU2022" rel="noopener noreferrer">PILIHU2022</a>{' '}and{' '}
+        <a href="https://github.com/PILIHU" rel="noopener noreferrer">PILIHU</a>.
       </p>
     </div>
   </section>
 
-  <section class="section" aria-label={t('about.ledgerLabel')}>
-    <div class="about-ledger">
-      <article>
-        <span>01</span>
-        <h3>系统与桌面</h3>
-        <p>Arch Linux 安装、AMD 显卡驱动、Hyprland 配置与全局黑暗模式。</p>
-      </article>
-      <article>
-        <span>02</span>
-        <h3>工具与效率</h3>
-        <p>Neovim、ruff、Git、GPG，以及把日常流程打磨顺手的小工具。</p>
-      </article>
-      <article>
-        <span>03</span>
-        <h3>联系</h3>
-        <p>
-          邮箱 <a href="mailto:Spark-CN@outlook.com">Spark-CN@outlook.com</a>，
-          代码在 <a href="https://github.com/PILIHU2022" rel="noopener noreferrer">GitHub</a>。
-        </p>
-      </article>
-    </div>
-  </section>
-
-  <section class="section prose-grid about-closing">
+  <section class="section prose-grid">
     <div>
-      <p class="eyebrow">写作</p>
-      <h2>保持好奇，保持记录。</h2>
+      <p class="eyebrow">Interests</p>
+      <h2>Computer &amp; games.</h2>
     </div>
-    <div class="prose-stack">
+    <div class="prose">
+      <h3>Computer</h3>
+      <p>Learning coding. Languages:</p>
+      <ol>
+        <li>C/C++ (Learning)</li>
+        <li>Python (Practicing)</li>
+      </ol>
+      <p>OS:</p>
+      <ol>
+        <li>
+          <a href="https://archlinux.org/" rel="noopener noreferrer">Arch Linux</a>{' '}(with{' '}
+          <a href="https://hypr.land/" rel="noopener noreferrer">Hyprland</a>)
+        </li>
+        <li>Windows (Useless)</li>
+      </ol>
+      <p>Coding:</p>
+      <ol>
+        <li><a href="https://neovim.io/" rel="noopener noreferrer">Neovim</a></li>
+        <li>
+          <a href="https://code.visualstudio.com/" rel="noopener noreferrer">Visual Studio Code</a>
+        </li>
+      </ol>
+
+      <h3>Games</h3>
+      <p><del>Nowadays I feel bored to play any games for no reason 😭</del></p>
+      <ol>
+        <li><a href="https://www.minecraft.net/" rel="noopener noreferrer">Minecraft</a></li>
+        <li><a href="https://store.steampowered.com/" rel="noopener noreferrer">Steam</a></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section prose-grid">
+    <div>
+      <p class="eyebrow">Contact</p>
+      <h2>Contact me.</h2>
+    </div>
+    <div class="prose">
       <p>
-        这个博客使用 Astro 和 Keel 主题构建，文章以 Markdown 保存，
-        搜索、RSS 与站点地图都在构建时生成。没有评论系统，也没有追踪脚本——
-        如果文章对你有帮助，或者发现了错误，欢迎直接发邮件告诉我。
+        Email me:{' '}
+        <a href="mailto:Spark-CN@outlook.com">Spark-CN@outlook.com</a>
+      </p>
+
+      <h3>This site</h3>
+      <ul>
+        <li>
+          This website is built with{' '}
+          <a href="https://astro.build/" rel="noopener noreferrer">Astro</a>{' '}and the{' '}
+          <a href="https://astro.build/themes/details/astro-keel/" rel="noopener noreferrer"
+            >Keel</a
+          >{' '}theme, deployed on{' '}
+          <a href="https://workers.cloudflare.com/" rel="noopener noreferrer">Cloudflare Workers</a
+          >.
+        </li>
+        <li>
+          This domain was bought in{' '}
+          <a href="https://www.spaceship.com/" rel="noopener noreferrer">Spaceship</a>; nameservers
+          on{' '}
+          <a href="https://cloudflare.com/" rel="noopener noreferrer">Cloudflare</a>.
+        </li>
+        <li>
+          You can find all the configuration for this blog in{' '}
+          <a href="https://github.com/PILIHU2022/Blog" rel="noopener noreferrer"
+            >this GitHub repository</a
+          >.
+        </li>
+        <li>
+          Thanks for the{' '}
+          <a href="https://docs.astro.build/" rel="noopener noreferrer">Astro docs</a>.
+        </li>
+      </ul>
+
+      <h3>Copyright</h3>
+      <p>
+        All of the pages are under{' '}
+        <a
+          href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+          rel="license noopener noreferrer">CC BY-NC-SA 4.0</a
+        >{' '}Deed.
+      </p>
+      <p>
+        <a
+          class="license-badge"
+          href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+          rel="license noopener noreferrer"
+        >
+          <img
+            src={withBase('/images/cc-by-nc-sa.png')}
+            alt="CC BY-NC-SA 4.0"
+            width="88"
+            height="31"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
       </p>
     </div>
   </section>

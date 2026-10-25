@@ -1178,6 +1178,12 @@ pre code {
   overflow-wrap: anywhere;
 }
 
+/* The Creative Commons badge is black artwork on a transparent background;
+   invert it on dark surfaces so it stays legible. */
+:root[data-theme='dark'] .license-badge img {
+  filter: invert(1);
+}
+
 .site-footer {
   /* A real three-column grid keeps the middle links centered regardless of
      how wide the copyright and social groups are. */
